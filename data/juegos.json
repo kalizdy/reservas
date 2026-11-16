@@ -1,0 +1,122 @@
+[
+  {
+    "id": "fc-26",
+    "titulo": "EA Sports FC 26",
+    "plataforma": "PS5",
+    "genero": "Deportes",
+    "jugadores": "1–4 jugadores",
+    "portada": "ps5.jpg"
+  },
+  {
+    "id": "spider-man-2",
+    "titulo": "Spider-Man 2",
+    "plataforma": "PS5",
+    "genero": "Acción / Aventura",
+    "jugadores": "1 jugador",
+    "portada": "ps5-setup.jpg"
+  },
+  {
+    "id": "mortal-kombat-1",
+    "titulo": "Mortal Kombat 1",
+    "plataforma": "PS5",
+    "genero": "Peleas",
+    "jugadores": "1–2 jugadores",
+    "portada": "ps5.jpg"
+  },
+  {
+    "id": "elden-ring",
+    "titulo": "Elden Ring",
+    "plataforma": "PS5",
+    "genero": "RPG / Soulslike",
+    "jugadores": "1 jugador",
+    "portada": "hero.jpg"
+  },
+  {
+    "id": "gran-turismo-7",
+    "titulo": "Gran Turismo 7",
+    "plataforma": "PS5",
+    "genero": "Carreras",
+    "jugadores": "1–2 jugadores",
+    "portada": "ps5-setup.jpg"
+  },
+  {
+    "id": "street-fighter-6",
+    "titulo": "Street Fighter 6",
+    "plataforma": "PS5",
+    "genero": "Peleas",
+    "jugadores": "1–2 jugadores",
+    "portada": "torneos.jpg"
+  },
+  {
+    "id": "god-of-war",
+    "titulo": "God of War Ragnarök",
+    "plataforma": "PS5",
+    "genero": "Acción / Aventura",
+    "jugadores": "1 jugador",
+    "portada": "ps5.jpg"
+  },
+  {
+    "id": "tekken-8",
+    "titulo": "Tekken 8",
+    "plataforma": "PS5",
+    "genero": "Peleas",
+    "jugadores": "1–2 jugadores",
+    "portada": "torneos.jpg"
+  },
+  {
+    "id": "warzone",
+    "titulo": "Call of Duty: Warzone",
+    "plataforma": "PC",
+    "genero": "Battle Royale",
+    "jugadores": "Online",
+    "portada": "torneos.jpg"
+  },
+  {
+    "id": "valorant",
+    "titulo": "Valorant",
+    "plataforma": "PC",
+    "genero": "Shooter táctico",
+    "jugadores": "Online 5v5",
+    "portada": "pc.jpg"
+  },
+  {
+    "id": "cs2",
+    "titulo": "Counter-Strike 2",
+    "plataforma": "PC",
+    "genero": "Shooter táctico",
+    "jugadores": "Online 5v5",
+    "portada": "torneos.jpg"
+  },
+  {
+    "id": "lol",
+    "titulo": "League of Legends",
+    "plataforma": "PC",
+    "genero": "MOBA",
+    "jugadores": "Online 5v5",
+    "portada": "pc.jpg"
+  },
+  {
+    "id": "apex",
+    "titulo": "Apex Legends",
+    "plataforma": "PC",
+    "genero": "Battle Royale",
+    "jugadores": "Online",
+    "portada": "hero.jpg"
+  },
+  {
+    "id": "fortnite",
+    "titulo": "Fortnite",
+    "plataforma": "PC",
+    "genero": "Battle Royale",
+    "jugadores": "Online",
+    "portada": "hero.jpg"
+  },
+  {
+    "id": "rocket-league",
+    "titulo": "Rocket League",
+    "plataforma": "PC",
+    "genero": "Deportes",
+    "jugadores": "Online 3v3",
+    "portada": "pc.jpg"
+  }
+]

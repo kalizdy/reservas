@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalizdy Game | PS5 &amp; PC Gamer</title>
   <meta name="description" content="Kalizdy Game: PS5 y PC Gamer en el Prado, La Paz. Reservá tu estación y sumá snacks.">
+  <meta name="theme-color" content="#04060c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kalizdy Game">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,6 +69,12 @@
       <button type="button" class="rail-btn" data-panel="estaciones" aria-pressed="false">
         <span class="rail-btn__icon" aria-hidden="true">▦</span>
         <span class="rail-btn__label">Estaciones</span>
+      </button>
+
+      <button type="button" class="rail-btn" data-panel="juegos" aria-pressed="false">
+        <span class="rail-btn__icon" aria-hidden="true">🎮</span>
+        <span class="rail-btn__label">Juegos</span>
+        <span class="rail-btn__badge" id="railJuegoCount">0</span>
       </button>
 
       <button type="button" class="rail-btn" data-panel="snacks" aria-pressed="false">
@@ -170,6 +184,7 @@
         <ul class="side-order">
           <li><span>Estación</span><strong id="sideEstacion">Sin elegir</strong></li>
           <li><span>Horas</span><strong id="sideHoras">1 hora</strong></li>
+          <li><span>Juegos en cola</span><strong id="sideJuegos">0</strong></li>
           <li><span>Snacks</span><strong id="sideSnacks">0 ítems</strong></li>
           <li class="side-order__total"><span>Total</span><strong id="sideTotal">Bs 0</strong></li>
         </ul>
@@ -253,7 +268,7 @@
 
             <article class="equipo-card" data-cat="ps5">
               <div class="equipo-card__media">
-                <img src="ps5.jpg" alt="Jugadores con controles de PS5 frente a la pantalla" loading="lazy">
+                <img src="ps5.jpg" alt="Jugadores con controles de PS5 frente a la pantalla" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--ps5">PS5</span>
                 <span class="equipo-card__lvl">LVL 01</span>
               </div>
@@ -281,7 +296,7 @@
 
             <article class="equipo-card" data-cat="ps5">
               <div class="equipo-card__media">
-                <img src="ps5-setup.jpg" alt="Consola PS5 y monitor con Warzone" loading="lazy">
+                <img src="ps5-setup.jpg" alt="Consola PS5 y monitor con Warzone" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--ps5">PS5</span>
                 <span class="equipo-card__lvl">LVL 02</span>
               </div>
@@ -309,7 +324,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y RGB" loading="lazy">
+                <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y RGB" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 03</span>
               </div>
@@ -337,7 +352,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="torneos.jpg" alt="Jugadores compitiendo en PCs en red" loading="lazy">
+                <img src="torneos.jpg" alt="Jugadores compitiendo en PCs en red" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 04</span>
               </div>
@@ -365,7 +380,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="hero.jpg" alt="Gamer con headset en una PC de alto rendimiento" loading="lazy">
+                <img src="hero.jpg" alt="Gamer con headset en una PC de alto rendimiento" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 05</span>
               </div>
@@ -396,11 +411,64 @@
       </div>
     </section>
 
+    <!-- ---------- PANEL JUEGOS ---------- -->
+    <section class="panel panel--juegos" id="panel-juegos" role="dialog" aria-modal="true" aria-labelledby="panelJuegosTitle" aria-hidden="true">
+      <header class="panel__head">
+        <div>
+          <p class="eyebrow">02 <span>//</span> Catálogo</p>
+          <h2 id="panelJuegosTitle">Elegí tu <span class="grad">juego</span></h2>
+        </div>
+        <div class="panel__head-actions">
+          <div class="cola-meta" aria-live="polite">
+            <span class="cola-meta__icon" aria-hidden="true">🕹</span>
+            <span><strong id="colaCount">0</strong> en cola</span>
+          </div>
+          <button type="button" class="panel__close" data-close-panel aria-label="Cerrar panel">×</button>
+        </div>
+      </header>
+
+      <div class="panel__body">
+        <div class="juegos-layout">
+          <div class="juegos-main">
+            <div class="panel-toolbar juegos-toolbar">
+              <div class="console-tabs" id="filtrosJuegos" role="group" aria-label="Filtrar catálogo por plataforma">
+                <button type="button" class="btn-console is-active" data-cat="all" aria-pressed="true">Todo</button>
+                <button type="button" class="btn-console" data-cat="ps5" aria-pressed="false">PS5</button>
+                <button type="button" class="btn-console" data-cat="pc" aria-pressed="false">PC Gamer</button>
+              </div>
+              <p class="juegos-count" id="juegosCount" aria-live="polite">Cargando catálogo…</p>
+            </div>
+
+            <p class="juegos-estado" id="catalogoEstado" role="status" aria-live="polite">
+              <span class="juegos-estado__spinner" aria-hidden="true"></span>
+              Cargando catálogo de juegos…
+            </p>
+
+            <div class="juegos-grid" id="catalogoJuegos" aria-busy="true"></div>
+          </div>
+
+          <aside class="cola-juegos" aria-label="Cola de juegos">
+            <p class="cola-juegos__title"><i class="status-dot" aria-hidden="true"></i> Mi cola</p>
+            <ul class="cola-juegos__list" id="colaJuegosLista">
+              <li class="cola-juegos__empty">Todavía no elegiste juegos.</li>
+            </ul>
+            <div class="cola-juegos__total">
+              <span>En cola</span>
+              <strong id="colaTotal">0 juegos</strong>
+            </div>
+            <button type="button" class="btn btn--block" id="colaReservar" data-open-panel="reserva">Reservar con mi cola</button>
+            <button type="button" class="btn btn--ghost btn--block" id="colaVaciar">Vaciar cola</button>
+            <p class="cola-juegos__nota">Los juegos están incluidos con tu estación.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
     <!-- ---------- PANEL SNACKS ---------- -->
     <section class="panel panel--snacks" id="panel-snacks" role="dialog" aria-modal="true" aria-labelledby="panelSnacksTitle" aria-hidden="true">
       <header class="panel__head">
         <div>
-          <p class="eyebrow">02 <span>//</span> Snack Bar</p>
+          <p class="eyebrow">03 <span>//</span> Snack Bar</p>
           <h2 id="panelSnacksTitle">Combo <span class="grad">Snacks</span></h2>
         </div>
         <div class="panel__head-actions">
@@ -526,7 +594,7 @@
     <section class="panel panel--galeria" id="panel-galeria" role="dialog" aria-modal="true" aria-labelledby="panelGaleriaTitle" aria-hidden="true">
       <header class="panel__head">
         <div>
-          <p class="eyebrow">03 <span>//</span> Galería</p>
+          <p class="eyebrow">04 <span>//</span> Galería</p>
           <h2 id="panelGaleriaTitle">Conocé <span class="grad">Kalizdy Game</span></h2>
         </div>
         <div class="panel__head-actions">
@@ -542,7 +610,7 @@
           <div class="carrusel__viewport">
 
             <article class="slide is-active">
-              <img src="ps5.jpg" alt="Zona PS5 con dos jugadores y controles DualSense">
+              <img src="ps5.jpg" alt="Zona PS5 con dos jugadores y controles DualSense" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">01</span>
@@ -552,7 +620,7 @@
             </article>
 
             <article class="slide">
-              <img src="ps5-setup.jpg" alt="Consola PS5 con monitor y Warzone">
+              <img src="ps5-setup.jpg" alt="Consola PS5 con monitor y Warzone" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">02</span>
@@ -562,7 +630,7 @@
             </article>
 
             <article class="slide">
-              <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y luces RGB">
+              <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y luces RGB" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">03</span>
@@ -572,7 +640,7 @@
             </article>
 
             <article class="slide">
-              <img src="torneos.jpg" alt="Jugadores compitiendo en una LAN">
+              <img src="torneos.jpg" alt="Jugadores compitiendo en una LAN" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">04</span>
@@ -582,7 +650,7 @@
             </article>
 
             <article class="slide">
-              <img src="snacks.jpg" alt="Hamburguesas y refrescos del snack bar">
+              <img src="snacks.jpg" alt="Hamburguesas y refrescos del snack bar" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">05</span>
@@ -608,7 +676,7 @@
     <section class="panel panel--reserva" id="panel-reserva" role="dialog" aria-modal="true" aria-labelledby="panelReservaTitle" aria-hidden="true">
       <header class="panel__head">
         <div>
-          <p class="eyebrow">04 <span>//</span> Reserva</p>
+          <p class="eyebrow">05 <span>//</span> Reserva</p>
           <h2 id="panelReservaTitle">Asegurá tu <span class="grad">lugar</span></h2>
         </div>
         <div class="panel__head-actions">
@@ -771,7 +839,7 @@
     <section class="panel panel--info" id="panel-info" role="dialog" aria-modal="true" aria-labelledby="panelInfoTitle" aria-hidden="true">
       <header class="panel__head">
         <div>
-          <p class="eyebrow">05 <span>//</span> Info</p>
+          <p class="eyebrow">06 <span>//</span> Info</p>
           <h2 id="panelInfoTitle">Todo sobre <span class="grad">Kalizdy</span></h2>
         </div>
         <div class="panel__head-actions">
@@ -905,7 +973,7 @@
   <!-- ================= TOAST ================= -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="vendor/jquery-3.7.1.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

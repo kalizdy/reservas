@@ -1,0 +1,129 @@
+/* =========================================================
+   KALIZDY GAME — SERVICE WORKER
+   PWA offline: shell + catálogo de juegos
+   ========================================================= */
+
+const CACHE_NAME = 'kalizdy-game-v4';
+
+const APP_SHELL = [
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
+  './data/juegos.json',
+  './vendor/jquery-3.7.1.min.js',
+  './hero.jpg',
+  './ps5.jpg',
+  './ps5-setup.jpg',
+  './pc.jpg',
+  './torneos.jpg',
+  './snacks.jpg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/icon-maskable-512.png'
+];
+
+/* ---------- Instalación: precarga del shell ---------- */
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
+});
+
+/* ---------- Activación: limpia versiones viejas ---------- */
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
+        )
+      )
+      .then(() => self.clients.claim())
+  );
+});
+
+/* ---------- Estrategias ---------- */
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+
+  const response = await fetch(request);
+  if (response && response.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    cache.put(request, response.clone());
+  }
+  return response;
+}
+
+async function networkFirst(request, fallbackUrl) {
+  const fallback = async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    if (fallbackUrl) {
+      const shell = await caches.match(fallbackUrl);
+      if (shell) return shell;
+    }
+
+    return null;
+  };
+
+  try {
+    const response = await fetch(request);
+
+    if (response && response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+      return response;
+    }
+
+    // Servidor caído o respuesta 4xx/5xx: usa la copia offline
+    const cached = await fallback();
+    return cached || response;
+  } catch (error) {
+    const cached = await fallback();
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+/* ---------- Fetch ---------- */
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  if (request.method !== 'GET') return;
+
+  const url = new URL(request.url);
+
+  // Solo manejamos recursos del mismo origen
+  if (url.origin !== self.location.origin) return;
+
+  // Navegación: red primero, luego index cacheado
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, './index.html'));
+    return;
+  }
+
+  // Catálogo: red primero para tener datos frescos, caché como respaldo
+  if (url.pathname.endsWith('/data/juegos.json')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Código y estilos: red primero para que los cambios se vean al recargar
+  if (url.pathname.endsWith('/styles.css') || url.pathname.endsWith('/script.js')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Estáticos: caché primero
+  event.respondWith(cacheFirst(request));
+});

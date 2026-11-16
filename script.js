@@ -43,6 +43,8 @@ $(function () {
       .attr('aria-pressed', isLight ? 'false' : 'true')
       .find('.theme-toggle__icon').html(isLight ? '☀' : '🌙').end()
       .find('.theme-toggle__label').html(isLight ? 'Modo claro' : 'Modo oscuro');
+
+    $('meta[name="theme-color"]').attr('content', isLight ? '#04060c' : '#e8eef7');
   });
 
   /* =======================================================
@@ -194,6 +196,275 @@ $(function () {
     $btn.attr('aria-expanded', isOpen ? 'false' : 'true');
     $btn.find('.faq-q__sign').text(isOpen ? '+' : '−');
   });
+
+  /* =======================================================
+     3.5) CATÁLOGO ASÍNCRONO DE JUEGOS
+     fetch() + JSON + renderizado dinámico + delegación .off().on()
+     ======================================================= */
+  var juegos = [];
+  var colaJuegos = [];
+  var filtroJuegos = 'all';
+
+  function plataformaCategoria(plataforma) {
+    return String(plataforma).toUpperCase().indexOf('PC') !== -1 ? 'pc' : 'ps5';
+  }
+
+  function buscarJuego(id) {
+    for (var i = 0; i < juegos.length; i++) {
+      if (juegos[i].id === id) return juegos[i];
+    }
+    return null;
+  }
+
+  function renderJuegos() {
+    var $grid = $('#catalogoJuegos').empty();
+
+    var visibles = $.grep(juegos, function (juego) {
+      return filtroJuegos === 'all' || plataformaCategoria(juego.plataforma) === filtroJuegos;
+    });
+
+    if (!visibles.length) {
+      $('<p>')
+        .addClass('juegos-vacio')
+        .text('No hay juegos para este filtro.')
+        .appendTo($grid);
+      $('#juegosCount').text('0 juegos');
+      return;
+    }
+
+    $.each(visibles, function (_, juego) {
+      var enCola = $.inArray(juego.id, colaJuegos) !== -1;
+
+      var $card = $('<article>')
+        .addClass('juego-card')
+        .attr({
+          'data-id': juego.id,
+          'data-cat': plataformaCategoria(juego.plataforma)
+        });
+
+      var $media = $('<div>').addClass('juego-card__media');
+
+      $('<img>')
+        .attr({
+          src: juego.portada,
+          alt: 'Portada de ' + juego.titulo,
+          loading: 'lazy',
+          decoding: 'async',
+          width: 480,
+          height: 270
+        })
+        .appendTo($media);
+
+      $('<span>')
+        .addClass('juego-card__tag juego-card__tag--' + plataformaCategoria(juego.plataforma))
+        .text(juego.plataforma)
+        .appendTo($media);
+
+      var $body = $('<div>').addClass('juego-card__body');
+
+      $('<h3>').text(juego.titulo).appendTo($body);
+      $('<p>').text(juego.genero + ' · ' + juego.jugadores).appendTo($body);
+
+      var $foot = $('<div>').addClass('juego-card__foot');
+
+      $('<button>')
+        .attr({
+          type: 'button',
+          'class': 'btn-cola-juego' + (enCola ? ' is-added' : ''),
+          'data-id': juego.id,
+          'aria-pressed': enCola ? 'true' : 'false'
+        })
+        .html(enCola ? '✓ En cola' : '＋ Cola')
+        .appendTo($foot);
+
+      $foot.appendTo($body);
+      $card.append($media).append($body).appendTo($grid);
+    });
+
+    $('#juegosCount').text(visibles.length + (visibles.length === 1 ? ' juego disponible' : ' juegos disponibles'));
+  }
+
+  function actualizarCola() {
+    var $lista = $('#colaJuegosLista').empty();
+
+    if (!colaJuegos.length) {
+      $('<li>')
+        .addClass('cola-juegos__empty')
+        .text('Todavía no elegiste juegos.')
+        .appendTo($lista);
+    } else {
+      $.each(colaJuegos, function (_, id) {
+        var juego = buscarJuego(id);
+        if (!juego) return;
+
+        $('<li>')
+          .addClass('cola-juegos__item')
+          .attr('data-id', id)
+          .append($('<span>').text(juego.titulo))
+          .append(
+            $('<button>')
+              .attr({
+                type: 'button',
+                'class': 'cola-juegos__remove',
+                'data-id': id,
+                'aria-label': 'Quitar ' + juego.titulo + ' de la cola'
+              })
+              .html('×')
+          )
+          .appendTo($lista);
+      });
+    }
+
+    var total = colaJuegos.length;
+
+    $('#colaCount').text(total);
+    $('#colaTotal').text(total + (total === 1 ? ' juego' : ' juegos'));
+    $('#sideJuegos').text(total);
+    $('#railJuegoCount')
+      .text(total)
+      .toggleClass('is-on', total > 0);
+
+    $('.btn-cola-juego').each(function () {
+      var $btn = $(this);
+      var id = String($btn.data('id'));
+      var activo = $.inArray(id, colaJuegos) !== -1;
+
+      $btn
+        .toggleClass('is-added', activo)
+        .attr('aria-pressed', activo ? 'true' : 'false')
+        .html(activo ? '✓ En cola' : '＋ Cola');
+    });
+  }
+
+  function cargarJuegos() {
+    var $estado = $('#catalogoEstado');
+
+    $('#catalogoJuegos').attr('aria-busy', 'true').empty();
+    $estado
+      .removeClass('is-error')
+      .html('<span class="juegos-estado__spinner" aria-hidden="true"></span> Cargando catálogo de juegos…')
+      .show();
+    $('#juegosCount').text('Cargando catálogo…');
+
+    fetch('data/juegos.json')
+      .then(function (response) {
+        if (!response.ok) {
+          throw new Error('Error HTTP ' + response.status);
+        }
+        return response.json();
+      })
+      .then(function (data) {
+        if (!Array.isArray(data)) {
+          throw new Error('Formato de catálogo inválido');
+        }
+
+        juegos = data;
+        $('#catalogoJuegos').attr('aria-busy', 'false');
+        $estado.hide();
+        renderJuegos();
+        actualizarCola();
+
+        if (window.console && console.info) {
+          console.info('Catálogo cargado:', juegos.length, 'juegos');
+        }
+      })
+      .catch(function (error) {
+        console.error('Fallo en catálogo:', error);
+
+        $('#catalogoJuegos').attr('aria-busy', 'false').empty();
+        $('#juegosCount').text('Catálogo no disponible');
+        $estado
+          .addClass('is-error')
+          .html(
+            '<strong>No se pudo cargar el catálogo.</strong> ' +
+            'Si abriste el archivo con doble clic, usá un servidor local ' +
+            '(por ejemplo: <code>python -m http.server</code>).'
+          )
+          .show();
+
+        $('<button>')
+          .attr({
+            type: 'button',
+            id: 'reintentarCatalogo',
+            'class': 'btn btn--ghost reintentar-catalogo'
+          })
+          .text('Reintentar')
+          .appendTo($estado);
+      });
+  }
+
+  /* Delegación de eventos: los botones se crean después del fetch.
+     .off().on() evita handlers duplicados si el catálogo se vuelve a renderizar. */
+  $('#catalogoJuegos')
+    .off('click', '.btn-cola-juego')
+    .on('click', '.btn-cola-juego', function () {
+      var id = String($(this).data('id'));
+      var juego = buscarJuego(id);
+      var indice = $.inArray(id, colaJuegos);
+
+      if (!juego) return;
+
+      if (indice === -1) {
+        colaJuegos.push(id);
+        mostrarToast(
+          '<strong>Juego agregado a la cola</strong>' + juego.titulo,
+          'ok'
+        );
+      } else {
+        colaJuegos.splice(indice, 1);
+        mostrarToast(
+          '<strong>Juego quitado de la cola</strong>' + juego.titulo,
+          'ok'
+        );
+      }
+
+      actualizarCola();
+    });
+
+  $('#colaJuegosLista')
+    .off('click', '.cola-juegos__remove')
+    .on('click', '.cola-juegos__remove', function () {
+      var id = String($(this).data('id'));
+      var indice = $.inArray(id, colaJuegos);
+
+      if (indice !== -1) {
+        colaJuegos.splice(indice, 1);
+        actualizarCola();
+      }
+    });
+
+  $('#filtrosJuegos')
+    .off('click', '.btn-console')
+    .on('click', '.btn-console', function () {
+      filtroJuegos = $(this).data('cat');
+
+      $('#filtrosJuegos .btn-console')
+        .removeClass('is-active')
+        .attr('aria-pressed', 'false');
+      $(this).addClass('is-active').attr('aria-pressed', 'true');
+
+      renderJuegos();
+    });
+
+  $('#colaVaciar')
+    .off('click')
+    .on('click', function () {
+      if (!colaJuegos.length) {
+        mostrarToast('<strong>La cola ya está vacía</strong>Agregá juegos desde el catálogo.', 'error');
+        return;
+      }
+
+      colaJuegos = [];
+      actualizarCola();
+      mostrarToast('<strong>Cola vaciada</strong>Elegí nuevos juegos cuando quieras.', 'ok');
+    });
+
+  $(document)
+    .off('click', '#reintentarCatalogo')
+    .on('click', '#reintentarCatalogo', cargarJuegos);
+
+  actualizarCola();
+  cargarJuegos();
 
   /* =======================================================
      4) SNACKS + RESUMEN EN VIVO
@@ -860,6 +1131,25 @@ $(function () {
 
   actualizarCarrusel();
   iniciarAutoplay();
+
+  /* =======================================================
+     8) PWA: REGISTRO DEL SERVICE WORKER
+     ======================================================= */
+  if (
+    'serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker
+        .register('sw.js')
+        .then(function (registro) {
+          console.info('Service Worker activo:', registro.scope);
+        })
+        .catch(function (error) {
+          console.warn('Service Worker no registrado:', error);
+        });
+    });
+  }
 
   console.log('%cKalizdy Game · sistema listo 🎮', 'color:#00e5ff;font-weight:bold');
 });
