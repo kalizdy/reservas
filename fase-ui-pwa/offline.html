@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sin conexión | Kalizdy Game</title>
+  <meta name="theme-color" content="#04060c">
+  <meta name="description" content="Pantalla offline de Kalizdy Game: el lobby y el catálogo siguen disponibles sin conexión.">
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      color-scheme: dark;
+      --bg: #04060c;
+      --panel: #0a1120;
+      --text: #e6f1ff;
+      --muted: #8ba0b8;
+      --accent: #00e5ff;
+      --lime: #b6ff3b;
+      --border: rgba(0, 229, 255, 0.28);
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.12), transparent 55%),
+        radial-gradient(circle at 85% 90%, rgba(168, 85, 247, 0.12), transparent 50%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Rajdhani", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    .card {
+      position: relative;
+      width: min(520px, 100%);
+      padding: 34px 30px 30px;
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--accent);
+      background: linear-gradient(160deg, rgba(13, 22, 40, 0.96), rgba(4, 6, 12, 0.96));
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 40px rgba(0, 229, 255, 0.08);
+      text-align: left;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.035) 0 1px,
+        transparent 1px 4px
+      );
+      opacity: 0.5;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .brand img {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border);
+      background: #05070d;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 1.05rem;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.62rem;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+    }
+
+    .code {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255, 176, 32, 0.4);
+      color: #ffb020;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffb020;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 11px 18px;
+      border: 1px solid transparent;
+      background: var(--accent);
+      color: #031018;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: filter 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .btn:hover {
+      filter: brightness(1.12);
+    }
+
+    .btn--ghost {
+      border-color: var(--border);
+      background: transparent;
+      color: var(--text);
+    }
+
+    .btn--ghost:hover {
+      border-color: var(--lime);
+      color: var(--lime);
+      filter: none;
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--lime);
+      outline-offset: 3px;
+    }
+
+    .hint {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(139, 160, 184, 0.18);
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .hint strong {
+      color: var(--text);
+    }
+
+    .online {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-left: 3px solid var(--lime);
+      background: rgba(182, 255, 59, 0.08);
+      color: var(--lime);
+      font-size: 0.85rem;
+    }
+
+    body.is-online .online {
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        padding: 26px 20px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">
+      <img src="icons/icon-192.png" alt="" width="48" height="48">
+      <div>
+        <strong>Kalizdy Game</strong>
+        <small>Gaming Lounge · Prado</small>
+      </div>
+    </div>
+
+    <span class="code"><span class="dot" aria-hidden="true"></span> Modo offline</span>
+
+    <h1>Estás <span>sin conexión</span></h1>
+    <p>
+      No pudimos cargar esta pantalla, pero tu sesión sigue viva.
+      El catálogo y las estaciones que ya visitaste quedaron guardados en el dispositivo.
+    </p>
+
+    <div class="actions">
+      <button type="button" class="btn" id="reintentar">Reintentar</button>
+      <a class="btn btn--ghost" href="./index.html">Volver al lobby</a>
+    </div>
+
+    <p class="hint">
+      <strong>Tip:</strong> si estás en el local, conectate al Wi-Fi o pedile
+      la clave al staff. La app vuelve a sincronizarse sola al recuperar internet.
+    </p>
+
+    <p class="online" id="online" role="status" aria-live="polite">
+      Conexión restablecida. Ya podés reintentar.
+    </p>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var boton = document.getElementById('reintentar');
+      var online = document.getElementById('online');
+
+      function actualizar() {
+        var conectado = navigator.onLine;
+        document.body.classList.toggle('is-online', conectado);
+
+        if (online) {
+          online.textContent = conectado
+            ? 'Conexión restablecida. Ya podés reintentar.'
+            : 'Seguís sin conexión. Probá de nuevo en unos segundos.';
+          online.style.display = conectado ? 'block' : 'none';
+        }
+      }
+
+      if (boton) {
+        boton.addEventListener('click', function () {
+          boton.disabled = true;
+          boton.textContent = 'Reintentando…';
+          window.location.reload();
+        });
+      }
+
+      window.addEventListener('online', function () {
+        actualizar();
+        if (boton) {
+          boton.disabled = false;
+          boton.textContent = 'Reintentar';
+        }
+      });
+
+      window.addEventListener('offline', actualizar);
+      actualizar();
+    })();
+  </script>
+</body>
+</html>

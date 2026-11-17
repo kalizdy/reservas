@@ -41,6 +41,7 @@ $(function () {
 
     $(this)
       .attr('aria-pressed', isLight ? 'false' : 'true')
+      .attr('aria-label', isLight ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro')
       .find('.theme-toggle__icon').html(isLight ? '☀' : '🌙').end()
       .find('.theme-toggle__label').html(isLight ? 'Modo claro' : 'Modo oscuro');
 
@@ -81,6 +82,10 @@ $(function () {
 
     if (nombre === 'galeria') {
       reiniciarAutoplay();
+    }
+
+    if (nombre === 'reserva') {
+      actualizarHorasDisponibles();
     }
 
     setTimeout(function () {
@@ -134,11 +139,11 @@ $(function () {
     pc:  { icon: '🖥', label: 'PC Gamer' }
   };
 
-  $('.btn-console').on('click', function () {
+  $('#consolas .btn-console').on('click', function () {
     var cat = $(this).data('cat');
     var zona = zonas[cat] || zonas.all;
 
-    $('.btn-console')
+    $('#consolas .btn-console')
       .removeClass('is-active')
       .attr('aria-pressed', 'false');
     $(this).addClass('is-active').attr('aria-pressed', 'true');
@@ -203,6 +208,7 @@ $(function () {
      ======================================================= */
   var juegos = [];
   var colaJuegos = [];
+  var colaPendiente = null;
   var filtroJuegos = 'all';
 
   function plataformaCategoria(plataforma) {
@@ -363,6 +369,18 @@ $(function () {
         $estado.hide();
         renderJuegos();
         actualizarCola();
+
+        // Hidratación: recupera la cola guardada si el catálogo tardó en cargar
+        if (colaPendiente) {
+          var pendientes = colaPendiente;
+          colaPendiente = null;
+          colaJuegos = $.grep(pendientes, function (id) {
+            return !!buscarJuego(String(id));
+          });
+          actualizarCola();
+        }
+
+        document.dispatchEvent(new CustomEvent('kalizdy:catalogo-listo'));
 
         if (window.console && console.info) {
           console.info('Catálogo cargado:', juegos.length, 'juegos');
@@ -577,6 +595,104 @@ $(function () {
     .attr('min', fechaISO(hoy))
     .attr('max', fechaISO(fechaMaxima));
 
+  /* Horario de atención: 14:00 a 23:00 (última entrada 22:00) */
+  var APERTURA_MIN = 14 * 60;
+  var CIERRE_MIN = 23 * 60;
+  var MAX_HORAS = 6;
+
+  function minutosDeHora(hora) {
+    var partes = String(hora || '').split(':');
+    if (partes.length !== 2) return NaN;
+
+    var h = parseInt(partes[0], 10);
+    var m = parseInt(partes[1], 10);
+    if (isNaN(h) || isNaN(m)) return NaN;
+
+    return h * 60 + m;
+  }
+
+  function horaMinimaHoy() {
+    var ahora = new Date();
+    var minutos = ahora.getHours() * 60 + ahora.getMinutes();
+
+    if (minutos <= APERTURA_MIN) return '14:00';
+
+    var siguiente = Math.ceil(minutos / 60) * 60;
+    if (siguiente > CIERRE_MIN - 60) return null; // después de las 22:00
+
+    return dosDigitos(siguiente / 60) + ':00';
+  }
+
+  function maxHorasPara(hora) {
+    var inicio = minutosDeHora(hora);
+    if (isNaN(inicio)) return MAX_HORAS;
+
+    return Math.max(1, Math.min(MAX_HORAS, Math.floor((CIERRE_MIN - inicio) / 60)));
+  }
+
+  function actualizarMaxHoras() {
+    var max = maxHorasPara($('#hora').val());
+    var actual = parseInt($('#horas').val(), 10);
+
+    $('#horas').attr('max', max);
+
+    if (!isNaN(actual) && actual > max) {
+      $('#horas').val(max).trigger('change');
+      actual = max;
+    }
+
+    $('#horasMas').prop('disabled', !isNaN(actual) && actual >= max);
+    $('#horasMenos').prop('disabled', !isNaN(actual) && actual <= 1);
+  }
+
+  function actualizarHorasDisponibles() {
+    var ahora = new Date();
+    var maxima = new Date();
+    maxima.setDate(maxima.getDate() + 90);
+
+    $('#fecha')
+      .attr('min', fechaISO(ahora))
+      .attr('max', fechaISO(maxima));
+
+    var fecha = $('#fecha').val();
+    var esHoy = fecha === fechaISO(ahora);
+    var minima = esHoy ? horaMinimaHoy() : '14:00';
+
+    $('#hora option').each(function () {
+      if (!this.value) return;
+
+      var disponible = minima !== null && this.value >= minima;
+      this.disabled = !disponible;
+    });
+
+    if (esHoy) {
+      var seleccion = $('#hora').val();
+
+      if (minima === null || (seleccion && seleccion < minima)) {
+        $('#hora').val('');
+      }
+    }
+
+    actualizarMaxHoras();
+  }
+
+  function siguienteHorarioDisponible() {
+    var minima = horaMinimaHoy();
+
+    if (minima) {
+      return { fecha: fechaISO(new Date()), hora: minima };
+    }
+
+    var manana = new Date();
+    manana.setDate(manana.getDate() + 1);
+
+    return { fecha: fechaISO(manana), hora: '14:00' };
+  }
+
+  $('#fecha').on('change', actualizarHorasDisponibles);
+  $('#hora').on('change', actualizarMaxHoras);
+  actualizarHorasDisponibles();
+
   function getTotales() {
     var estacion = $('#estacion').val() || '';
     var precio = precios[estacion] || 0;
@@ -670,13 +786,16 @@ $(function () {
 
   updateSnacks();
 
-  /* Horas: botones + / − y límite 1–6 */
+  /* Horas: botones + / − y límite 1–6 según el horario elegido */
   function ajustarHoras(delta) {
     var actual = parseInt($('#horas').val(), 10);
     if (isNaN(actual)) actual = 1;
 
-    var nuevo = Math.min(6, Math.max(1, actual + delta));
+    var max = maxHorasPara($('#hora').val());
+    var nuevo = Math.min(max, Math.max(1, actual + delta));
+
     $('#horas').val(nuevo).trigger('change');
+    actualizarMaxHoras();
   }
 
   $('#horasMenos').on('click', function () {
@@ -689,19 +808,46 @@ $(function () {
 
   $('#horas').on('input', function () {
     var valor = parseInt(this.value, 10);
-    if (!isNaN(valor) && valor > 6) {
-      this.value = 6;
+    var max = maxHorasPara($('#hora').val());
+
+    if (!isNaN(valor)) {
+      if (valor > max) this.value = max;
+      if (valor < 1) this.value = 1;
     }
+
+    actualizarMaxHoras();
   });
 
   /* Botón "Alquilar hora" de cada tarjeta */
   $('.btn-alquilar').on('click', function () {
     var estacion = $(this).data('estacion');
     var precio = Number($(this).data('precio')) || 0;
+    var sugerencia = siguienteHorarioDisponible();
 
     $('#estacion').val(estacion).trigger('change');
     $('#horas').val(1).trigger('change');
 
+    if (!$('#fecha').val()) {
+      $('#fecha').val(sugerencia.fecha);
+      $('#hora').val(sugerencia.hora);
+    }
+
+    actualizarHorasDisponibles();
+
+    if (!$('#hora').val()) {
+      var fecha = $('#fecha').val();
+      var minima = fecha === fechaISO(new Date()) ? horaMinimaHoy() : '14:00';
+
+      if (minima) {
+        $('#hora').val(minima);
+      } else {
+        $('#fecha').val(sugerencia.fecha);
+        actualizarHorasDisponibles();
+        $('#hora').val(sugerencia.hora);
+      }
+    }
+
+    actualizarMaxHoras();
     updateResumen();
 
     mostrarToast(
@@ -743,20 +889,44 @@ $(function () {
     },
     horas: function (valor) {
       var numero = parseInt(valor, 10);
+      var max = maxHorasPara($('#hora').val());
+
       if (!valor) return 'Indicá cuántas horas querés reservar.';
-      if (isNaN(numero) || numero < 1 || numero > 6) return 'Elegí entre 1 y 6 horas.';
+      if (isNaN(numero) || numero < 1 || numero > MAX_HORAS) return 'Elegí entre 1 y 6 horas.';
       if (String(numero) !== String(valor).trim()) return 'Usá un número entero de horas.';
+      if (numero > max) {
+        return 'Con ese horario el máximo es ' + max +
+          (max === 1 ? ' hora' : ' horas') + ' (el local cierra a las 23:00).';
+      }
       return '';
     },
     fecha: function (valor) {
       if (!valor) return 'Elegí una fecha.';
-      if (valor < fechaISO(hoy)) return 'La fecha no puede ser anterior a hoy.';
-      if (valor > fechaISO(fechaMaxima)) return 'Elegí una fecha dentro de los próximos 90 días.';
+
+      var ahora = new Date();
+      var max = new Date();
+      max.setDate(max.getDate() + 90);
+
+      if (valor < fechaISO(ahora)) return 'La fecha no puede ser anterior a hoy.';
+      if (valor > fechaISO(max)) return 'Elegí una fecha dentro de los próximos 90 días.';
       return '';
     },
     hora: function (valor) {
       if (!valor) return 'Elegí una hora.';
       if (valor < '14:00' || valor > '22:00') return 'El horario de reservas es de 14:00 a 22:00.';
+
+      if ($('#fecha').val() === fechaISO(new Date())) {
+        var minima = horaMinimaHoy();
+
+        if (!minima) {
+          return 'Ya no quedan horarios disponibles para hoy. Elegí otra fecha.';
+        }
+
+        if (valor < minima) {
+          return 'Para hoy el próximo horario disponible es ' + minima + '.';
+        }
+      }
+
       return '';
     },
     personas: function (valor) {
@@ -858,6 +1028,7 @@ $(function () {
      ======================================================= */
   var cuentaTimer = null;
   var segundosRestantes = 30;
+  var envioTimer = null;
 
   function actualizarCuenta() {
     var segundos = Math.max(segundosRestantes, 0);
@@ -895,10 +1066,96 @@ $(function () {
     }, 1000);
   }
 
+  function generarCodigoReserva() {
+    var ahora = new Date();
+    var base = String(ahora.getFullYear()).slice(-2) +
+      dosDigitos(ahora.getMonth() + 1) +
+      dosDigitos(ahora.getDate());
+    var aleatorio = Math.floor(Math.random() * 900) + 100;
+
+    return 'KG-' + base + '-' + aleatorio;
+  }
+
+  function resetModalVista() {
+    if (envioTimer) {
+      clearTimeout(envioTimer);
+      envioTimer = null;
+    }
+
+    $('#modalConfirmacion').removeAttr('hidden').show();
+    $('#modalEnviado').hide().attr('hidden', 'hidden');
+    $('#modalReserva').attr('aria-labelledby', 'modalTitulo');
+    $('#modalConfirmar')
+      .prop('disabled', false)
+      .removeAttr('aria-busy')
+      .text('Enviar reserva');
+    $('#modalCancelar').prop('disabled', false);
+  }
+
+  function enviarReservaSimulada() {
+    if ($('#modalConfirmar').prop('disabled')) return;
+
+    detenerCuenta();
+
+    var datos = getTotales();
+    var personas = $('#personas').val();
+    var snacksCount = 0;
+
+    $.each(datos.snacks, function (_, item) {
+      snacksCount += item.qty;
+    });
+
+    $('#modalConfirmar')
+      .prop('disabled', true)
+      .attr('aria-busy', 'true')
+      .text('Enviando…');
+    $('#modalCancelar').prop('disabled', true);
+
+    // Simula el envío al local sin backend
+    envioTimer = setTimeout(function () {
+      envioTimer = null;
+
+      var ahora = new Date();
+      var horaEnvio = dosDigitos(ahora.getHours()) + ':' + dosDigitos(ahora.getMinutes());
+
+      $('#envioNombre').text($('#nombre').val() || 'Gamer');
+      $('#envioEstado').text('Enviado ahora · ' + horaEnvio);
+      $('#envioCodigo').text(generarCodigoReserva());
+      $('#envioEstacion').text(datos.estacion || '—');
+      $('#envioFecha').text(formatFecha($('#fecha').val()));
+      $('#envioHora').text($('#hora').val() || '—');
+      $('#envioPersonas').text(
+        personas ? personas + (personas === '1' ? ' persona' : ' personas') : '—'
+      );
+      $('#envioHoras').text(textoHoras(datos.horas));
+      $('#envioSnacks').text(
+        datos.snacks.length
+          ? snacksCount + (snacksCount === 1 ? ' ítem · ' : ' ítems · ') +
+            'Bs ' + datos.totalSnacks
+          : 'Sin snacks'
+      );
+      $('#envioTotal').text('Bs ' + datos.total);
+
+      $('#modalConfirmacion').hide().attr('hidden', 'hidden');
+      $('#modalEnviado').removeAttr('hidden').show();
+      $('#modalReserva').attr('aria-labelledby', 'modalEnvioTitulo');
+      $('#modalEnvioTitulo').trigger('focus');
+    }, 850);
+  }
+
   function abrirModal() {
     var datos = getTotales();
 
+    resetModalVista();
+
     $('#modalEstacion').text(datos.estacion || '—');
+    $('#modalFecha').text(formatFecha($('#fecha').val()));
+    $('#modalHora').text($('#hora').val() || '—');
+    $('#modalPersonas').text(
+      $('#personas').val()
+        ? $('#personas').val() + ($('#personas').val() === '1' ? ' persona' : ' personas')
+        : '—'
+    );
     $('#modalHoras').text(textoHoras(datos.horas));
     $('#modalPrecio').text('Bs ' + datos.precio + ' / hora');
     $('#modalSubtotal').text('Bs ' + datos.subtotalEstacion);
@@ -923,14 +1180,21 @@ $(function () {
 
     $('#modalReserva').fadeIn(200).attr('aria-hidden', 'false');
     $('body').addClass('modal-open');
-    $('#modalConfirmar').trigger('focus');
+    $('#modalCerrar').trigger('focus');
     iniciarCuenta();
   }
 
   function cerrarModal() {
     detenerCuenta();
+
+    if (envioTimer) {
+      clearTimeout(envioTimer);
+      envioTimer = null;
+    }
+
     $('#modalReserva').fadeOut(200).attr('aria-hidden', 'true');
     $('body').removeClass('modal-open');
+    resetModalVista();
   }
 
   $('#modalCerrar, #modalCancelar').on('click', cerrarModal);
@@ -946,14 +1210,13 @@ $(function () {
     }
   });
 
-  $('#modalConfirmar').on('click', function () {
-    var total = $('#modalTotal').text();
+  $('#modalConfirmar').on('click', enviarReservaSimulada);
+
+  $('#envioCerrar').on('click', cerrarModal);
+
+  $('#envioNueva').on('click', function () {
     cerrarModal();
-    mostrarToast(
-      '<strong>Reserva confirmada</strong>' +
-      'Total: ' + total + ' · ¡Te esperamos en Kalizdy Game!',
-      'ok'
-    );
+    $('#reservaForm').trigger('reset');
   });
 
   $('#reservaForm').on('submit', function (event) {
@@ -1011,6 +1274,7 @@ $(function () {
 
       $('#formError').hide().text('');
       $('#horas').val(1);
+      actualizarHorasDisponibles();
 
       $.each(snackState, function (id) {
         snackState[id] = 0;
@@ -1133,7 +1397,123 @@ $(function () {
   iniciarAutoplay();
 
   /* =======================================================
-     8) PWA: REGISTRO DEL SERVICE WORKER
+     8) HIDRATACIÓN: API DE ESTADO PARA LA CAPA PWA
+     ======================================================= */
+  function obtenerEstado() {
+    var snacks = {};
+
+    $.each(snackState, function (id, qty) {
+      if (qty > 0) snacks[id] = qty;
+    });
+
+    return {
+      tema: $('body').hasClass('theme-light') ? 'light' : 'dark',
+      snacks: snacks,
+      cola: colaJuegos.slice(),
+      reserva: {
+        nombre: $('#nombre').val() || '',
+        celular: $('#celular').val() || '',
+        estacion: $('#estacion').val() || '',
+        horas: $('#horas').val() || '',
+        fecha: $('#fecha').val() || '',
+        hora: $('#hora').val() || '',
+        personas: $('#personas').val() || ''
+      }
+    };
+  }
+
+  function aplicarEstado(estado) {
+    if (!estado || typeof estado !== 'object') return false;
+
+    /* Tema: reutiliza el handler existente para actualizar ARIA y theme-color */
+    if (estado.tema === 'light' && !$('body').hasClass('theme-light')) {
+      $('#themeToggle').trigger('click');
+    } else if (estado.tema === 'dark' && $('body').hasClass('theme-light')) {
+      $('#themeToggle').trigger('click');
+    }
+
+    /* Snacks */
+    if (estado.snacks && typeof estado.snacks === 'object') {
+      $.each(snackState, function (id) {
+        var qty = parseInt(estado.snacks[id], 10);
+        snackState[id] = isNaN(qty) ? 0 : Math.min(10, Math.max(0, qty));
+      });
+      updateSnacks();
+    }
+
+    /* Cola de juegos: si el catálogo aún no cargó, queda pendiente */
+    if (Array.isArray(estado.cola)) {
+      var vistos = {};
+      var cola = $.grep(estado.cola, function (id) {
+        var key = String(id);
+        if (vistos[key]) return false;
+        vistos[key] = true;
+        return true;
+      });
+
+      if (juegos.length) {
+        colaJuegos = $.grep(cola, function (id) {
+          return !!buscarJuego(String(id));
+        });
+        actualizarCola();
+      } else {
+        colaPendiente = cola;
+      }
+    }
+
+    /* Borrador de reserva */
+    if (estado.reserva && typeof estado.reserva === 'object') {
+      var r = estado.reserva;
+
+      if (typeof r.nombre === 'string') {
+        $('#nombre').val(r.nombre.slice(0, 40));
+      }
+
+      if (typeof r.celular === 'string') {
+        $('#celular').val(r.celular.replace(/\D/g, '').slice(0, 11));
+      }
+
+      if (r.estacion && Object.prototype.hasOwnProperty.call(precios, r.estacion)) {
+        $('#estacion').val(r.estacion);
+      }
+
+      var horas = parseInt(r.horas, 10);
+      if (!isNaN(horas)) {
+        $('#horas').val(Math.min(MAX_HORAS, Math.max(1, horas)));
+      }
+
+      var ahora = new Date();
+      var maxFecha = new Date();
+      maxFecha.setDate(maxFecha.getDate() + 90);
+
+      if (r.fecha && r.fecha >= fechaISO(ahora) && r.fecha <= fechaISO(maxFecha)) {
+        $('#fecha').val(r.fecha);
+      }
+
+      if (r.hora) {
+        $('#hora').val(r.hora);
+      }
+
+      var personas = parseInt(r.personas, 10);
+      if (personas >= 1 && personas <= 6) {
+        $('#personas').val(String(personas));
+      }
+
+      actualizarHorasDisponibles();
+      actualizarMaxHoras();
+      updateResumen();
+    }
+
+    return true;
+  }
+
+  window.KalizdyGame = {
+    estado: obtenerEstado,
+    aplicar: aplicarEstado
+  };
+
+  /* =======================================================
+     9) PWA: REGISTRO DEL SERVICE WORKER
      ======================================================= */
   if (
     'serviceWorker' in navigator &&

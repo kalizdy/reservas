@@ -3,13 +3,15 @@
    PWA offline: shell + catálogo de juegos
    ========================================================= */
 
-const CACHE_NAME = 'kalizdy-game-v4';
+const CACHE_NAME = 'kalizdy-game-v5';
+const CACHE_PREFIX = 'kalizdy-game-';
 
 const APP_SHELL = [
   './',
   './index.html',
   './styles.css',
   './script.js',
+  './hidratacion.js',
   './manifest.json',
   './data/juegos.json',
   './vendor/jquery-3.7.1.min.js',
@@ -42,7 +44,7 @@ self.addEventListener('activate', (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
             .map((key) => caches.delete(key))
         )
       )
@@ -77,11 +79,23 @@ async function networkFirst(request, fallbackUrl) {
   };
 
   try {
-    const response = await fetch(request);
+    var peticion = request;
+
+    // Evita servir un index viejo desde la caché HTTP al navegar
+    if (request.mode === 'navigate') {
+      peticion = new Request(request.url, {
+        cache: 'reload',
+        credentials: 'same-origin',
+        headers: request.headers,
+        redirect: 'follow'
+      });
+    }
+
+    const response = await fetch(peticion);
 
     if (response && response.ok) {
       const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone());
       return response;
     }
 

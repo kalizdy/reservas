@@ -1,0 +1,104 @@
+{
+  "id": "./",
+  "name": "Kalizdy Game — PS5 & PC Gamer",
+  "short_name": "Kalizdy Game",
+  "description": "Lobby gamer con estaciones PS5 y PC, catálogo de juegos, snacks y reservas en el Prado, La Paz.",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "background_color": "#04060c",
+  "theme_color": "#04060c",
+  "categories": ["games", "entertainment", "food"],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Reservar estación",
+      "short_name": "Reservar",
+      "description": "Abrir la calculadora de reservas",
+      "url": "./index.html?panel=reserva",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Catálogo de juegos",
+      "short_name": "Juegos",
+      "description": "Ver los juegos disponibles",
+      "url": "./index.html?panel=juegos",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Snack Bar",
+      "short_name": "Snacks",
+      "description": "Sumar combos y bebidas al pedido",
+      "url": "./index.html?panel=snacks",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "hero.jpg",
+      "sizes": "1400x933",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Lobby de Kalizdy Game"
+    },
+    {
+      "src": "ps5.jpg",
+      "sizes": "1400x933",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Zona PS5"
+    },
+    {
+      "src": "pc.jpg",
+      "sizes": "1400x934",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "PC Gamer"
+    }
+  ]
+}

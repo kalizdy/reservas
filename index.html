@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalizdy Game | PS5 &amp; PC Gamer</title>
   <meta name="description" content="Kalizdy Game: PS5 y PC Gamer en el Prado, La Paz. Reservá tu estación y sumá snacks.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_BO">
+  <meta property="og:site_name" content="Kalizdy Game">
+  <meta property="og:title" content="Kalizdy Game | PS5 &amp; PC Gamer">
+  <meta property="og:description" content="PS5 y PC Gamer en el Prado, La Paz. Elegí tu estación, sumá snacks y reservá en segundos.">
+  <meta property="og:image" content="hero.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kalizdy Game | PS5 &amp; PC Gamer">
+  <meta name="twitter:description" content="PS5 y PC Gamer en el Prado, La Paz. Elegí tu estación, sumá snacks y reservá en segundos.">
+  <meta name="twitter:image" content="hero.jpg">
   <meta name="theme-color" content="#04060c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,7 +37,7 @@
 
     <!-- ================= TOP BAR ================= -->
     <header class="lobby-top">
-      <a class="brand lobby-brand" href="#" id="brandHome" aria-label="Kalizdy Game - Lobby">
+      <a class="brand lobby-brand" href="#" id="brandHome" aria-label="KalizdyGame Gaming Lounge — Ir al lobby">
         <span class="brand__mark" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="48" height="48" role="img">
             <path d="M14 16h20c5 0 8.6 3.8 9.6 8.7l2 9.4c.9 4.2-3.4 7.2-6.6 4.2L34.4 33H13.6L9 38.3c-3.2 3-7.5 0-6.6-4.2l2-9.4C5.4 19.8 9 16 14 16Z" fill="#05070d"/>
@@ -48,11 +58,11 @@
       </div>
 
       <div class="lobby-top__actions">
-        <button type="button" class="theme-toggle lobby-theme" id="themeToggle" aria-pressed="false">
+        <button type="button" class="theme-toggle lobby-theme" id="themeToggle" aria-label="Cambiar a modo claro" aria-pressed="false">
           <span class="theme-toggle__icon" aria-hidden="true">☀</span>
           <span class="theme-toggle__label">Modo claro</span>
         </button>
-        <a class="lobby-wa" href="https://wa.me/59175867586" target="_blank" rel="noopener">
+        <a class="lobby-wa" href="https://wa.me/59175867586" target="_blank" rel="noopener" aria-label="WhatsApp 75867586">
           <span aria-hidden="true">✆</span>
           <span class="lobby-wa__text">WhatsApp</span>
         </a>
@@ -201,7 +211,7 @@
         <a href="https://wa.me/59175867586" target="_blank" rel="noopener">WhatsApp 75867586</a>
       </section>
 
-      <p class="side-footer">KALIZDY GAME · 2026</p>
+      <p class="side-footer">KALIZDY GAME · 2026 · <a href="https://www.instagram.com/kalizdygame/" target="_blank" rel="noopener">@kalizdygame</a></p>
     </aside>
 
     <!-- ================= BARRA INFERIOR ================= -->
@@ -866,8 +876,31 @@
               <article class="info-card">
                 <span>03</span>
                 <h3>Contacto</h3>
-                <p>WhatsApp 75867586<br>@kalizdygame</p>
+                <p>
+                  <a href="https://wa.me/59175867586" target="_blank" rel="noopener">WhatsApp 75867586</a><br>
+                  <a href="https://www.instagram.com/kalizdygame/" target="_blank" rel="noopener">Instagram @kalizdygame</a>
+                </p>
               </article>
+            </div>
+
+            <div class="social-links" aria-label="Redes sociales de Kalizdy Game">
+              <a class="social-link" href="https://www.instagram.com/kalizdygame/" target="_blank" rel="noopener">
+                <span class="social-link__icon" aria-hidden="true">◎</span>
+                <span class="social-link__body">
+                  <small>Instagram</small>
+                  <strong>@kalizdygame</strong>
+                </span>
+                <span class="social-link__go" aria-hidden="true">→</span>
+              </a>
+
+              <a class="social-link" href="https://wa.me/59175867586" target="_blank" rel="noopener">
+                <span class="social-link__icon" aria-hidden="true">✆</span>
+                <span class="social-link__body">
+                  <small>WhatsApp</small>
+                  <strong>75867586</strong>
+                </span>
+                <span class="social-link__go" aria-hidden="true">→</span>
+              </a>
             </div>
 
             <div class="faq">
@@ -938,35 +971,79 @@
     <div class="modal__dialog">
       <button type="button" class="modal__close" id="modalCerrar" aria-label="Cerrar">×</button>
 
-      <p class="eyebrow">// Confirmación</p>
-      <h3 id="modalTitulo">Confirmá tu reserva</h3>
-      <p class="modal__lead">Verificá el detalle antes de procesar el pago.</p>
+      <div class="modal__vista" id="modalConfirmacion">
+        <p class="eyebrow">// Confirmación</p>
+        <h3 id="modalTitulo">Revisá tu reserva</h3>
+        <p class="modal__lead">Verificá el detalle antes de enviarla.</p>
 
-      <div class="modal__timer" id="modalTimerBox">
-        <span>Tiempo restante</span>
-        <strong id="modalTimer">00:30</strong>
+        <div class="modal__timer" id="modalTimerBox">
+          <span>Tiempo restante</span>
+          <strong id="modalTimer">00:30</strong>
+        </div>
+        <div class="modal__progress"><span id="modalProgress"></span></div>
+
+        <ul class="modal__list">
+          <li><span>Estación</span><strong id="modalEstacion">—</strong></li>
+          <li><span>Fecha</span><strong id="modalFecha">—</strong></li>
+          <li><span>Hora</span><strong id="modalHora">—</strong></li>
+          <li><span>Personas</span><strong id="modalPersonas">—</strong></li>
+          <li><span>Horas</span><strong id="modalHoras">—</strong></li>
+          <li><span>Precio / hora</span><strong id="modalPrecio">—</strong></li>
+          <li><span>Subtotal estación</span><strong id="modalSubtotal">—</strong></li>
+          <li><span>Total snacks</span><strong id="modalTotalSnacks">—</strong></li>
+        </ul>
+
+        <ul class="modal__snacks" id="modalSnacksLista"></ul>
+
+        <div class="modal__total">
+          <span>Total</span>
+          <strong id="modalTotal">—</strong>
+        </div>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="modalCancelar">Cancelar</button>
+          <button type="button" class="btn" id="modalConfirmar">Enviar reserva</button>
+        </div>
       </div>
-      <div class="modal__progress"><span id="modalProgress"></span></div>
 
-      <ul class="modal__list">
-        <li><span>Estación</span><strong id="modalEstacion">—</strong></li>
-        <li><span>Horas</span><strong id="modalHoras">—</strong></li>
-        <li><span>Precio / hora</span><strong id="modalPrecio">—</strong></li>
-        <li><span>Subtotal estación</span><strong id="modalSubtotal">—</strong></li>
-        <li><span>Total snacks</span><strong id="modalTotalSnacks">—</strong></li>
-      </ul>
+      <section class="modal__vista modal__enviado" id="modalEnviado" aria-live="polite" hidden>
+        <p class="eyebrow">// Simulación</p>
+        <div class="modal__check" aria-hidden="true">✓</div>
+        <h3 id="modalEnvioTitulo" tabindex="-1">Reserva enviada</h3>
+        <p class="modal__lead">
+          Listo, <strong id="envioNombre">—</strong>. Tu reserva quedó registrada.
+        </p>
 
-      <ul class="modal__snacks" id="modalSnacksLista"></ul>
+        <p class="modal__estado">
+          <i class="status-dot" aria-hidden="true"></i>
+          <span id="envioEstado">Enviado ahora</span>
+        </p>
 
-      <div class="modal__total">
-        <span>Total a pagar</span>
-        <strong id="modalTotal">—</strong>
-      </div>
+        <div class="modal__code">
+          <span>Código de reserva</span>
+          <strong id="envioCodigo">—</strong>
+        </div>
 
-      <div class="modal__actions">
-        <button type="button" class="btn btn--ghost" id="modalCancelar">Cancelar</button>
-        <button type="button" class="btn" id="modalConfirmar">Procesar pago</button>
-      </div>
+        <ul class="modal__list">
+          <li><span>Estación</span><strong id="envioEstacion">—</strong></li>
+          <li><span>Fecha</span><strong id="envioFecha">—</strong></li>
+          <li><span>Hora</span><strong id="envioHora">—</strong></li>
+          <li><span>Personas</span><strong id="envioPersonas">—</strong></li>
+          <li><span>Horas</span><strong id="envioHoras">—</strong></li>
+          <li><span>Snacks</span><strong id="envioSnacks">—</strong></li>
+          <li class="modal__list-total"><span>Total</span><strong id="envioTotal">—</strong></li>
+        </ul>
+
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="envioNueva">Nueva reserva</button>
+          <button type="button" class="btn" id="envioCerrar">Listo</button>
+        </div>
+
+        <p class="modal__nota">
+          Simulación local: la reserva se muestra como enviada, pero no se envió
+          a ningún servidor ni se realizó un cobro real.
+        </p>
+      </section>
     </div>
   </div>
 
@@ -975,5 +1052,7 @@
 
   <script src="vendor/jquery-3.7.1.min.js"></script>
   <script src="script.js"></script>
+  <!-- Hidratación de estado: tema, snacks, cola y borrador de reserva -->
+  <script src="hidratacion.js"></script>
 </body>
 </html>
