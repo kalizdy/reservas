@@ -3,10 +3,10 @@
    Shell + catálogo offline, actualizaciones controladas
    ========================================================= */
 
-const CACHE_NAME = 'kalizdy-pwa-v12';
+const CACHE_NAME = 'kalizdy-pwa-v17';
 const CACHE_PREFIX = 'kalizdy-pwa-';
 const OFFLINE_URL = './offline.html';
-const ASSET_VERSION = '20261127';
+const ASSET_VERSION = '20261132';
 
 const APP_SHELL = [
   './',
@@ -20,12 +20,13 @@ const APP_SHELL = [
   './manifest.json',
   './data/juegos.json',
   './vendor/jquery-3.7.1.min.js',
-  './hero.jpg',
-  './ps5.jpg',
-  './ps5-setup.jpg',
-  './pc.jpg',
-  './torneos.jpg',
-  './snacks.jpg',
+  './vendor/dompurify.min.js',
+  './hero.webp',
+  './ps5.webp',
+  './ps5-setup.webp',
+  './pc.webp',
+  './torneos.webp',
+  './snacks.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'

@@ -15,7 +15,8 @@ la fase UI terminada, con instalación, actualizaciones, atajos y modo offline r
 | `pwa.js` | Registro del SW, instalación, aviso de nueva versión, atajos y estado online |
 | `pwa.css` | Estilos de los controles PWA integrados a la estética HUD |
 | `hidratacion.js` | Hidratación de estado: tema, snacks, cola y borrador de reserva en `localStorage` |
-| `styles.css`, `script.js`, `data/`, `icons/`, `vendor/`, `*.jpg` | Código y recursos del sitio |
+| `AUDITORIA-CWV.md` | Medición de LCP/CLS antes/después y checklist de la guía C3-A2 |
+| `styles.css`, `script.js`, `data/`, `icons/`, `vendor/`, `*.webp` | Código y recursos del sitio. DOMPurify local en `vendor/dompurify.min.js` |
 
 ## Funcionalidades PWA
 
@@ -29,6 +30,19 @@ la fase UI terminada, con instalación, actualizaciones, atajos y modo offline r
 - **Atajos de app**: Reservar, Juegos y Snacks desde el icono instalado
   (`?panel=reserva`, `?panel=juegos`, `?panel=snacks`).
 - **Estado de conexión**: aviso “Sin conexión” y recuperación automática al volver la red.
+- **Menú móvil**: en pantallas de hasta 760 px aparece una hamburguesa que abre
+  el menú lateral como drawer; en escritorio se mantiene el rail fijo.
+
+## Rendimiento, BEM y seguridad
+
+- **Core Web Vitals**: LCP local **1.60 s** y CLS **0** en escritorio; móvil 375×812
+  con LCP **0.80 s**. Detalle en `AUDITORIA-CWV.md`.
+- **Imágenes WebP** para el héroe, estaciones, catálogo y galería.
+- **Preload + `fetchpriority="high"`** del héroe, con `width`/`height` declarados.
+- **BEM limpio**: sin selectores ID en CSS, sin estilos inline y con `!important`
+  solo en la excepción de `prefers-reduced-motion`.
+- **DOMPurify 3.1.6 local** (`vendor/dompurify.min.js`) sanitiza el HTML de los
+  toasts antes de usar `.html()`. Si no carga, se usa un respaldo de texto seguro.
 
 ## Hidratación de estado
 
@@ -68,7 +82,8 @@ El estado se guarda **solo en el dispositivo** y no se envía a ningún servidor
   después de las 23:00 (por ejemplo, a las 22:00 solo se permite 1 hora).
 - El botón **Alquilar hora** preselecciona fecha y próximo horario disponible.
 - El modal de confirmación muestra estación, fecha, hora, personas, horas,
-  snacks y total antes de enviar.
+  snacks, forma de pago y total antes de enviar.
+- **Pago en el local:** efectivo, tarjeta o QR al llegar. No se cobra online.
 - Al enviar se simula el envío: aparece **“Reserva enviada”** con un código,
   el resumen completo y la hora de envío. **No hay backend**: es una simulación
   local, no se envía nada ni se cobra.
@@ -106,9 +121,9 @@ Luego abrí `http://localhost:8080`.
 ### Probar una actualización
 
 1. Cambiá la versión en dos lugares:
-   - `ASSET_VERSION` en `sw.js` (por ejemplo `20261127` → `20261128`).
-   - Los `?v=20261127` de `index.html` (styles, pwa.css, script, hidratacion y pwa.js).
-2. Cambiá también `CACHE_NAME` (por ejemplo `kalizdy-pwa-v12` → `kalizdy-pwa-v13`).
+   - `ASSET_VERSION` en `sw.js` (por ejemplo `20261132` → `20261133`).
+   - Los `?v=20261132` de `index.html` (styles, pwa.css, script, hidratacion y pwa.js).
+2. Cambiá también `CACHE_NAME` (por ejemplo `kalizdy-pwa-v17` → `kalizdy-pwa-v18`).
 3. Recargá dos veces: aparece el banner **Nueva versión disponible**.
 4. Presioná **Actualizar**: el SW toma el control y la página se recarga una vez.
 

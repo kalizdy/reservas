@@ -3,24 +3,26 @@
    PWA offline: shell + catálogo de juegos
    ========================================================= */
 
-const CACHE_NAME = 'kalizdy-game-v5';
+const CACHE_NAME = 'kalizdy-game-v9';
 const CACHE_PREFIX = 'kalizdy-game-';
+const ASSET_VERSION = '20261132';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css',
-  './script.js',
-  './hidratacion.js',
+  `./styles.css?v=${ASSET_VERSION}`,
+  `./script.js?v=${ASSET_VERSION}`,
+  `./hidratacion.js?v=${ASSET_VERSION}`,
   './manifest.json',
   './data/juegos.json',
   './vendor/jquery-3.7.1.min.js',
-  './hero.jpg',
-  './ps5.jpg',
-  './ps5-setup.jpg',
-  './pc.jpg',
-  './torneos.jpg',
-  './snacks.jpg',
+  './vendor/dompurify.min.js',
+  './hero.webp',
+  './ps5.webp',
+  './ps5-setup.webp',
+  './pc.webp',
+  './torneos.webp',
+  './snacks.webp',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png'
@@ -83,6 +85,14 @@ async function networkFirst(request, fallbackUrl) {
 
     // Evita servir un index viejo desde la caché HTTP al navegar
     if (request.mode === 'navigate') {
+      peticion = new Request(request.url, {
+        cache: 'reload',
+        credentials: 'same-origin',
+        headers: request.headers,
+        redirect: 'follow'
+      });
+    } else if (request.destination === 'script' || request.destination === 'style') {
+      // Fuerza la versión nueva de CSS/JS después de publicar cambios
       peticion = new Request(request.url, {
         cache: 'reload',
         credentials: 'same-origin',

@@ -122,12 +122,110 @@ $(function () {
 
   $('.rail-btn').on('click', function () {
     abrirPanel($(this).data('panel'));
+    cerrarMenu(false);
   });
 
   $('#brandHome').on('click', function (event) {
     event.preventDefault();
     cerrarPaneles();
   });
+
+  /* =======================================================
+     1.6) MENÚ MÓVIL (HAMBURGUESA + DRAWER)
+     ======================================================= */
+  var menuAbierto = false;
+  var $lobbyRail = $('#lobbyRail');
+  var $menuToggle = $('#menuToggle');
+  var $railBackdrop = $('#railBackdrop');
+
+  function menuEsMovil() {
+    return window.matchMedia('(max-width: 760px)').matches;
+  }
+
+  function actualizarMenuAccesibilidad() {
+    if (!menuEsMovil()) {
+      $lobbyRail.removeAttr('inert').attr('aria-hidden', 'false');
+      return;
+    }
+
+    if (menuAbierto) {
+      $lobbyRail.removeAttr('inert').attr('aria-hidden', 'false');
+    } else {
+      $lobbyRail.attr('inert', '').attr('aria-hidden', 'true');
+    }
+  }
+
+  function abrirMenu() {
+    if (!menuEsMovil() || menuAbierto) return;
+
+    menuAbierto = true;
+    $('body').addClass('menu-open');
+    $lobbyRail.addClass('is-open');
+    $menuToggle.attr({ 'aria-expanded': 'true', 'aria-label': 'Cerrar menú' });
+    actualizarMenuAccesibilidad();
+
+    setTimeout(function () {
+      $('#railClose').trigger('focus');
+    }, 180);
+  }
+
+  function cerrarMenu(devolverFoco) {
+    if (!menuAbierto) return;
+
+    menuAbierto = false;
+    $('body').removeClass('menu-open');
+    $lobbyRail.removeClass('is-open');
+    $menuToggle.attr({ 'aria-expanded': 'false', 'aria-label': 'Abrir menú' });
+    actualizarMenuAccesibilidad();
+
+    if (devolverFoco) {
+      $menuToggle.trigger('focus');
+    }
+  }
+
+  $menuToggle.on('click', function () {
+    if (menuAbierto) {
+      cerrarMenu(true);
+    } else {
+      abrirMenu();
+    }
+  });
+
+  $('#railClose').on('click', function () {
+    cerrarMenu(true);
+  });
+
+  $railBackdrop.on('click', function () {
+    cerrarMenu(true);
+  });
+
+  $lobbyRail.on('keydown', function (event) {
+    if (!menuAbierto || event.key !== 'Tab') return;
+
+    var $focos = $lobbyRail.find('button, a[href]').filter(':visible');
+    if (!$focos.length) return;
+
+    var primero = $focos[0];
+    var ultimo = $focos[$focos.length - 1];
+
+    if (event.shiftKey && document.activeElement === primero) {
+      event.preventDefault();
+      ultimo.focus();
+    } else if (!event.shiftKey && document.activeElement === ultimo) {
+      event.preventDefault();
+      primero.focus();
+    }
+  });
+
+  $(window).on('resize orientationchange', function () {
+    if (!menuEsMovil()) {
+      cerrarMenu(false);
+    }
+
+    actualizarMenuAccesibilidad();
+  });
+
+  actualizarMenuAccesibilidad();
 
   /* =======================================================
      2) SELECTOR DE CONSOLAS (PS5 / PC GAMER)
@@ -1007,6 +1105,19 @@ $(function () {
      ======================================================= */
   var toastTimer = null;
 
+  /* Sanitiza el HTML de los toasts antes de inyectarlo con .html() */
+  function sanitizarHtml(html) {
+    if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+      return window.DOMPurify.sanitize(String(html), {
+        ALLOWED_TAGS: ['strong', 'b', 'em', 'br', 'span'],
+        ALLOWED_ATTR: []
+      });
+    }
+
+    // Respaldo seguro si DOMPurify no cargó: muestra solo texto
+    return $('<div>').text(String(html).replace(/<[^>]*>/g, '')).html();
+  }
+
   function mostrarToast(mensaje, tipo) {
     var $toast = $('#toast');
 
@@ -1015,7 +1126,7 @@ $(function () {
       .stop(true, true)
       .removeClass('toast--ok toast--error')
       .addClass(tipo === 'error' ? 'toast--error' : 'toast--ok')
-      .html(mensaje)
+      .html(sanitizarHtml(mensaje))
       .slideDown(250);
 
     toastTimer = setTimeout(function () {
@@ -1205,6 +1316,8 @@ $(function () {
 
     if ($('#modalReserva').is(':visible')) {
       cerrarModal();
+    } else if (menuAbierto) {
+      cerrarMenu(true);
     } else if (panelActual) {
       cerrarPaneles();
     }
@@ -1509,7 +1622,8 @@ $(function () {
 
   window.KalizdyGame = {
     estado: obtenerEstado,
-    aplicar: aplicarEstado
+    aplicar: aplicarEstado,
+    abrirPanel: abrirPanel
   };
 
   /* =======================================================

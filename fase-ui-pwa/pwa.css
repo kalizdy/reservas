@@ -3,8 +3,9 @@
    Estilos de instalación, avisos y estado de conexión
    ========================================================= */
 
-[hidden] {
-  display: none !important;
+.lobby-install[hidden],
+.pwa-banner[hidden] {
+  display: none;
 }
 
 /* ---------- Botón "Instalar app" ---------- */
@@ -54,7 +55,7 @@
 
 /* En modo app no se ofrece instalar */
 html.pwa-standalone .lobby-install {
-  display: none !important;
+  display: none;
 }
 
 /* ---------- Avisos flotantes ---------- */
@@ -229,7 +230,7 @@ html.pwa-standalone .lobby-install {
   }
 
   /* Si ya hay aviso offline, la actualización sube para no taparlo */
-  #pwaOffline:not([hidden]) ~ #pwaUpdate {
+  .pwa-banner--offline:not([hidden]) ~ .pwa-banner--update {
     bottom: 96px;
   }
 }

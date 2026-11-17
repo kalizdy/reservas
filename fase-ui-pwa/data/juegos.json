@@ -5,7 +5,7 @@
     "plataforma": "PS5",
     "genero": "Deportes",
     "jugadores": "1–4 jugadores",
-    "portada": "ps5.jpg"
+    "portada": "ps5.webp"
   },
   {
     "id": "spider-man-2",
@@ -13,7 +13,7 @@
     "plataforma": "PS5",
     "genero": "Acción / Aventura",
     "jugadores": "1 jugador",
-    "portada": "ps5-setup.jpg"
+    "portada": "ps5-setup.webp"
   },
   {
     "id": "mortal-kombat-1",
@@ -21,7 +21,7 @@
     "plataforma": "PS5",
     "genero": "Peleas",
     "jugadores": "1–2 jugadores",
-    "portada": "ps5.jpg"
+    "portada": "ps5.webp"
   },
   {
     "id": "elden-ring",
@@ -29,7 +29,7 @@
     "plataforma": "PS5",
     "genero": "RPG / Soulslike",
     "jugadores": "1 jugador",
-    "portada": "hero.jpg"
+    "portada": "hero.webp"
   },
   {
     "id": "gran-turismo-7",
@@ -37,7 +37,7 @@
     "plataforma": "PS5",
     "genero": "Carreras",
     "jugadores": "1–2 jugadores",
-    "portada": "ps5-setup.jpg"
+    "portada": "ps5-setup.webp"
   },
   {
     "id": "street-fighter-6",
@@ -45,7 +45,7 @@
     "plataforma": "PS5",
     "genero": "Peleas",
     "jugadores": "1–2 jugadores",
-    "portada": "torneos.jpg"
+    "portada": "torneos.webp"
   },
   {
     "id": "god-of-war",
@@ -53,7 +53,7 @@
     "plataforma": "PS5",
     "genero": "Acción / Aventura",
     "jugadores": "1 jugador",
-    "portada": "ps5.jpg"
+    "portada": "ps5.webp"
   },
   {
     "id": "tekken-8",
@@ -61,7 +61,7 @@
     "plataforma": "PS5",
     "genero": "Peleas",
     "jugadores": "1–2 jugadores",
-    "portada": "torneos.jpg"
+    "portada": "torneos.webp"
   },
   {
     "id": "warzone",
@@ -69,7 +69,7 @@
     "plataforma": "PC",
     "genero": "Battle Royale",
     "jugadores": "Online",
-    "portada": "torneos.jpg"
+    "portada": "torneos.webp"
   },
   {
     "id": "valorant",
@@ -77,7 +77,7 @@
     "plataforma": "PC",
     "genero": "Shooter táctico",
     "jugadores": "Online 5v5",
-    "portada": "pc.jpg"
+    "portada": "pc.webp"
   },
   {
     "id": "cs2",
@@ -85,7 +85,7 @@
     "plataforma": "PC",
     "genero": "Shooter táctico",
     "jugadores": "Online 5v5",
-    "portada": "torneos.jpg"
+    "portada": "torneos.webp"
   },
   {
     "id": "lol",
@@ -93,7 +93,7 @@
     "plataforma": "PC",
     "genero": "MOBA",
     "jugadores": "Online 5v5",
-    "portada": "pc.jpg"
+    "portada": "pc.webp"
   },
   {
     "id": "apex",
@@ -101,7 +101,7 @@
     "plataforma": "PC",
     "genero": "Battle Royale",
     "jugadores": "Online",
-    "portada": "hero.jpg"
+    "portada": "hero.webp"
   },
   {
     "id": "fortnite",
@@ -109,7 +109,7 @@
     "plataforma": "PC",
     "genero": "Battle Royale",
     "jugadores": "Online",
-    "portada": "hero.jpg"
+    "portada": "hero.webp"
   },
   {
     "id": "rocket-league",
@@ -117,6 +117,6 @@
     "plataforma": "PC",
     "genero": "Deportes",
     "jugadores": "Online 3v3",
-    "portada": "pc.jpg"
+    "portada": "pc.webp"
   }
 ]

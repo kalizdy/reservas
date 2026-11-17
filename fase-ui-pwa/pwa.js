@@ -30,7 +30,9 @@
 
     if (!panel) return;
 
-    if (panel === 'inicio') {
+    if (window.KalizdyGame && typeof window.KalizdyGame.abrirPanel === 'function') {
+      window.KalizdyGame.abrirPanel(panel);
+    } else if (panel === 'inicio') {
       var home = document.querySelector('.rail-btn[data-panel="inicio"]');
       if (home) home.click();
     } else {
@@ -41,7 +43,7 @@
 
     // Solo limpia la URL cuando el panel realmente se abrió;
     // si no, se reintenta con el evento load.
-    if (!document.getElementById('panel-' + panel)?.classList.contains('is-open')) {
+    if (panel !== 'inicio' && !document.getElementById('panel-' + panel)?.classList.contains('is-open')) {
       return;
     }
 

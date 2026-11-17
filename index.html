@@ -21,6 +21,7 @@
   <meta name="apple-mobile-web-app-title" content="Kalizdy Game">
 
   <link rel="manifest" href="manifest.json">
+  <link rel="preload" as="image" href="hero.webp" fetchpriority="high">
   <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
@@ -29,7 +30,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Estructura: index.html + styles.css + script.js -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261132">
 </head>
 <body>
 
@@ -37,6 +38,10 @@
 
     <!-- ================= TOP BAR ================= -->
     <header class="lobby-top">
+      <button type="button" class="lobby-burger" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="lobbyRail">
+        <span aria-hidden="true">☰</span>
+      </button>
+
       <a class="brand lobby-brand" href="#" id="brandHome" aria-label="KalizdyGame Gaming Lounge — Ir al lobby">
         <span class="brand__mark" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="48" height="48" role="img">
@@ -70,7 +75,12 @@
     </header>
 
     <!-- ================= RAIL IZQUIERDO ================= -->
-    <nav class="lobby-rail" aria-label="Menú principal del lobby">
+    <nav class="lobby-rail" id="lobbyRail" aria-label="Menú principal del lobby">
+      <div class="rail-head">
+        <span class="rail-head__title">Menú</span>
+        <button type="button" class="rail-close" id="railClose" aria-label="Cerrar menú">×</button>
+      </div>
+
       <button type="button" class="rail-btn is-active" data-panel="inicio" aria-pressed="true">
         <span class="rail-btn__icon" aria-hidden="true">⌂</span>
         <span class="rail-btn__label">Lobby</span>
@@ -109,10 +119,12 @@
       </button>
     </nav>
 
+    <div class="rail-backdrop" id="railBackdrop" aria-hidden="true"></div>
+
     <!-- ================= ESCENARIO CENTRAL ================= -->
     <main class="lobby-stage" id="inicio">
       <div class="stage-bg" aria-hidden="true">
-        <img src="hero.jpg" alt="">
+        <img src="hero.webp" alt="" width="1400" height="933" fetchpriority="high" decoding="async">
         <span class="stage-bg__grid"></span>
       </div>
 
@@ -178,7 +190,7 @@
     <aside class="lobby-side" aria-label="Tu partida y datos del local">
       <section class="side-player">
         <div class="side-player__ava">
-          <img src="hero.jpg" alt="">
+          <img src="hero.webp" alt="">
         </div>
         <div class="side-player__meta">
           <small>GAMER</small>
@@ -186,7 +198,7 @@
           <span>Nivel 27 · Prado</span>
         </div>
         <span class="side-player__lvl" aria-hidden="true">27</span>
-        <div class="side-player__xp" aria-hidden="true"><span style="width: 64%"></span></div>
+        <div class="side-player__xp" aria-hidden="true"><span class="side-player__xp-fill"></span></div>
       </section>
 
       <section class="side-block">
@@ -257,7 +269,7 @@
       </header>
 
       <div class="panel__body">
-        <div id="consolas">
+        <div id="consolas" class="equipos-panel">
           <div class="panel-toolbar">
             <div class="console-tabs" role="group" aria-label="Filtrar por tipo de consola">
               <button type="button" class="btn-console is-active" data-cat="all" aria-pressed="true">Todo</button>
@@ -278,7 +290,7 @@
 
             <article class="equipo-card" data-cat="ps5">
               <div class="equipo-card__media">
-                <img src="ps5.jpg" alt="Jugadores con controles de PS5 frente a la pantalla" loading="lazy" decoding="async" width="480" height="270">
+                <img src="ps5.webp" alt="Jugadores con controles de PS5 frente a la pantalla" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--ps5">PS5</span>
                 <span class="equipo-card__lvl">LVL 01</span>
               </div>
@@ -306,7 +318,7 @@
 
             <article class="equipo-card" data-cat="ps5">
               <div class="equipo-card__media">
-                <img src="ps5-setup.jpg" alt="Consola PS5 y monitor con Warzone" loading="lazy" decoding="async" width="480" height="270">
+                <img src="ps5-setup.webp" alt="Consola PS5 y monitor con Warzone" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--ps5">PS5</span>
                 <span class="equipo-card__lvl">LVL 02</span>
               </div>
@@ -334,7 +346,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y RGB" loading="lazy" decoding="async" width="480" height="270">
+                <img src="pc.webp" alt="Setup de PC Gamer con dos monitores y RGB" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 03</span>
               </div>
@@ -362,7 +374,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="torneos.jpg" alt="Jugadores compitiendo en PCs en red" loading="lazy" decoding="async" width="480" height="270">
+                <img src="torneos.webp" alt="Jugadores compitiendo en PCs en red" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 04</span>
               </div>
@@ -390,7 +402,7 @@
 
             <article class="equipo-card" data-cat="pc">
               <div class="equipo-card__media">
-                <img src="hero.jpg" alt="Gamer con headset en una PC de alto rendimiento" loading="lazy" decoding="async" width="480" height="270">
+                <img src="hero.webp" alt="Gamer con headset en una PC de alto rendimiento" loading="lazy" decoding="async" width="480" height="270">
                 <span class="equipo-card__tag tag--pc">PC Gamer</span>
                 <span class="equipo-card__lvl">LVL 05</span>
               </div>
@@ -441,7 +453,7 @@
         <div class="juegos-layout">
           <div class="juegos-main">
             <div class="panel-toolbar juegos-toolbar">
-              <div class="console-tabs" id="filtrosJuegos" role="group" aria-label="Filtrar catálogo por plataforma">
+              <div class="console-tabs juegos-filtros" id="filtrosJuegos" role="group" aria-label="Filtrar catálogo por plataforma">
                 <button type="button" class="btn-console is-active" data-cat="all" aria-pressed="true">Todo</button>
                 <button type="button" class="btn-console" data-cat="ps5" aria-pressed="false">PS5</button>
                 <button type="button" class="btn-console" data-cat="pc" aria-pressed="false">PC Gamer</button>
@@ -609,7 +621,7 @@
         </div>
         <div class="panel__head-actions">
           <div class="carrusel__meta" aria-live="polite">
-            <span id="slideActual">01</span> <i>/</i> <span id="slideTotal">05</span>
+            <span id="slideActual" class="carrusel__meta-value">01</span> <i>/</i> <span id="slideTotal">05</span>
           </div>
           <button type="button" class="panel__close" data-close-panel aria-label="Cerrar panel">×</button>
         </div>
@@ -620,7 +632,7 @@
           <div class="carrusel__viewport">
 
             <article class="slide is-active">
-              <img src="ps5.jpg" alt="Zona PS5 con dos jugadores y controles DualSense" loading="lazy" decoding="async" width="1200" height="675">
+              <img src="ps5.webp" alt="Zona PS5 con dos jugadores y controles DualSense" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">01</span>
@@ -630,7 +642,7 @@
             </article>
 
             <article class="slide">
-              <img src="ps5-setup.jpg" alt="Consola PS5 con monitor y Warzone" loading="lazy" decoding="async" width="1200" height="675">
+              <img src="ps5-setup.webp" alt="Consola PS5 con monitor y Warzone" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">02</span>
@@ -640,7 +652,7 @@
             </article>
 
             <article class="slide">
-              <img src="pc.jpg" alt="Setup de PC Gamer con dos monitores y luces RGB" loading="lazy" decoding="async" width="1200" height="675">
+              <img src="pc.webp" alt="Setup de PC Gamer con dos monitores y luces RGB" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">03</span>
@@ -650,7 +662,7 @@
             </article>
 
             <article class="slide">
-              <img src="torneos.jpg" alt="Jugadores compitiendo en una LAN" loading="lazy" decoding="async" width="1200" height="675">
+              <img src="torneos.webp" alt="Jugadores compitiendo en una LAN" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">04</span>
@@ -660,7 +672,7 @@
             </article>
 
             <article class="slide">
-              <img src="snacks.jpg" alt="Hamburguesas y refrescos del snack bar" loading="lazy" decoding="async" width="1200" height="675">
+              <img src="snacks.webp" alt="Hamburguesas y refrescos del snack bar" loading="lazy" decoding="async" width="1200" height="675">
               <span class="slide__scan"></span>
               <div class="slide__caption">
                 <span class="slide__index">05</span>
@@ -701,18 +713,28 @@
             <p class="eyebrow">// Check-in</p>
             <p class="reserva__lead">
               Elegí consola, fecha y hora. Te confirmamos la reserva al instante
-              y te esperamos con el setup listo.
+              y pagás directamente cuando llegás al local.
             </p>
 
             <ul class="reserva__list">
               <li><span aria-hidden="true">▸</span> Confirmación inmediata</li>
               <li><span aria-hidden="true">▸</span> Cambios gratis hasta 2 horas antes</li>
+              <li><span aria-hidden="true">▸</span> Pago en el local: efectivo, tarjeta o QR</li>
               <li><span aria-hidden="true">▸</span> Snacks y bebidas en el local</li>
             </ul>
 
             <div class="reserva__hours">
               <span>Horario</span>
               <strong>Lun a Dom · 14:00 – 23:00</strong>
+            </div>
+
+            <div class="reserva__pago">
+              <span class="reserva__pago-icon" aria-hidden="true">💵</span>
+              <span class="reserva__pago-text">
+                <small>Forma de pago</small>
+                <strong>En el local · efectivo, tarjeta o QR</strong>
+                <span>No se cobra online.</span>
+              </span>
             </div>
 
             <a class="btn btn--ghost reserva__wa" href="https://wa.me/59175867586" target="_blank" rel="noopener">
@@ -811,14 +833,15 @@
                 <li><span>Fecha</span><strong id="resumenFecha">—</strong></li>
                 <li><span>Hora</span><strong id="resumenHora">—</strong></li>
                 <li><span>Personas</span><strong id="resumenPersonas">—</strong></li>
-                <li><span>Horas</span><strong id="resumenHoras">—</strong></li>
+                <li><span>Horas</span><strong id="resumenHoras">-</strong></li>
+                <li><span>Pago</span><strong>En el local</strong></li>
                 <li><span>Precio / hora</span><strong id="resumenPrecio">Bs 0</strong></li>
                 <li><span>Subtotal estación</span><strong id="resumenSubtotalEstacion">Bs 0</strong></li>
               </ul>
 
               <div class="pedido__snacks">
                 <p class="pedido__subtitle">Snacks</p>
-                <ul id="resumenSnacksLista">
+                <ul id="resumenSnacksLista" class="resumen-snacks">
                   <li class="pedido__empty">Sin snacks seleccionados.</li>
                 </ul>
                 <div class="pedido__line">
@@ -945,6 +968,16 @@
                   <p>Cada estación admite hasta 6 personas. Las salas PS5 incluyen dos controles DualSense.</p>
                 </div>
               </div>
+
+              <div class="faq-item">
+                <button type="button" class="faq-q" aria-expanded="false">
+                  ¿Cómo se paga la reserva?
+                  <span class="faq-q__sign" aria-hidden="true">+</span>
+                </button>
+                <div class="faq-a">
+                  <p>No se cobra online. El pago se realiza en el local en efectivo, tarjeta o QR al llegar.</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -954,7 +987,7 @@
             <ol class="info-steps">
               <li><b>01</b><span>Elegí estación y horas en la calculadora.</span></li>
               <li><b>02</b><span>Sumá combos y snacks a tu pedido.</span></li>
-              <li><b>03</b><span>Confirmá y enviá la reserva por WhatsApp.</span></li>
+              <li><b>03</b><span>Enviá la reserva y pagá en el local.</span></li>
             </ol>
 
             <button type="button" class="btn btn--block" data-open-panel="reserva">Ir a reservar</button>
@@ -974,7 +1007,7 @@
       <div class="modal__vista" id="modalConfirmacion">
         <p class="eyebrow">// Confirmación</p>
         <h3 id="modalTitulo">Revisá tu reserva</h3>
-        <p class="modal__lead">Verificá el detalle antes de enviarla.</p>
+        <p class="modal__lead">Verificá el detalle antes de enviarla. El pago se realiza en el local.</p>
 
         <div class="modal__timer" id="modalTimerBox">
           <span>Tiempo restante</span>
@@ -988,6 +1021,7 @@
           <li><span>Hora</span><strong id="modalHora">—</strong></li>
           <li><span>Personas</span><strong id="modalPersonas">—</strong></li>
           <li><span>Horas</span><strong id="modalHoras">—</strong></li>
+          <li><span>Pago</span><strong>En el local</strong></li>
           <li><span>Precio / hora</span><strong id="modalPrecio">—</strong></li>
           <li><span>Subtotal estación</span><strong id="modalSubtotal">—</strong></li>
           <li><span>Total snacks</span><strong id="modalTotalSnacks">—</strong></li>
@@ -996,7 +1030,7 @@
         <ul class="modal__snacks" id="modalSnacksLista"></ul>
 
         <div class="modal__total">
-          <span>Total</span>
+          <span>Total a pagar en el local</span>
           <strong id="modalTotal">—</strong>
         </div>
 
@@ -1031,6 +1065,7 @@
           <li><span>Personas</span><strong id="envioPersonas">—</strong></li>
           <li><span>Horas</span><strong id="envioHoras">—</strong></li>
           <li><span>Snacks</span><strong id="envioSnacks">—</strong></li>
+          <li><span>Pago</span><strong>En el local</strong></li>
           <li class="modal__list-total"><span>Total</span><strong id="envioTotal">—</strong></li>
         </ul>
 
@@ -1041,7 +1076,7 @@
 
         <p class="modal__nota">
           Simulación local: la reserva se muestra como enviada, pero no se envió
-          a ningún servidor ni se realizó un cobro real.
+          a ningún servidor. El pago se realiza en el local en efectivo, tarjeta o QR.
         </p>
       </section>
     </div>
@@ -1051,8 +1086,9 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="vendor/jquery-3.7.1.min.js"></script>
-  <script src="script.js"></script>
+  <script src="vendor/dompurify.min.js"></script>
+  <script src="script.js?v=20261132"></script>
   <!-- Hidratación de estado: tema, snacks, cola y borrador de reserva -->
-  <script src="hidratacion.js"></script>
+  <script src="hidratacion.js?v=20261132"></script>
 </body>
 </html>
