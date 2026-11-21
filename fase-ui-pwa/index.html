@@ -32,9 +32,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Estructura: index.html + styles.css + script.js -->
-  <link rel="stylesheet" href="styles.css?v=20261132">
+  <link rel="stylesheet" href="styles.css?v=20261133">
   <!-- Capa PWA: instalación, actualizaciones y estado de conexión -->
-  <link rel="stylesheet" href="pwa.css?v=20261132">
+  <link rel="stylesheet" href="pwa.css?v=20261133">
 </head>
 <body>
 
@@ -1042,6 +1042,8 @@
           <strong id="modalTotal">—</strong>
         </div>
 
+        <p class="form-error" id="modalEnvioError" role="alert"></p>
+
         <div class="modal__actions">
           <button type="button" class="btn btn--ghost" id="modalCancelar">Cancelar</button>
           <button type="button" class="btn" id="modalConfirmar">Enviar reserva</button>
@@ -1073,6 +1075,7 @@
           <li><span>Personas</span><strong id="envioPersonas">—</strong></li>
           <li><span>Horas</span><strong id="envioHoras">—</strong></li>
           <li><span>Snacks</span><strong id="envioSnacks">—</strong></li>
+          <li><span>Estado</span><strong id="envioEstadoReserva">Pendiente</strong></li>
           <li><span>Pago</span><strong>En el local</strong></li>
           <li class="modal__list-total"><span>Total</span><strong id="envioTotal">—</strong></li>
         </ul>
@@ -1083,8 +1086,8 @@
         </div>
 
         <p class="modal__nota">
-          Simulación local: la reserva se muestra como enviada, pero no se envió
-          a ningún servidor. El pago se realiza en el local en efectivo, tarjeta o QR.
+          Reserva registrada en el sistema. El pago se realiza en el local en
+          efectivo, tarjeta o QR.
         </p>
       </section>
     </div>
@@ -1115,10 +1118,11 @@
 
   <script src="vendor/jquery-3.7.1.min.js"></script>
   <script src="vendor/dompurify.min.js"></script>
-  <script src="script.js?v=20261132"></script>
+  <script src="supabase.js"></script>
+  <script src="script.js?v=20261133"></script>
   <!-- Hidratación de estado: tema, snacks, cola y borrador de reserva -->
-  <script src="hidratacion.js?v=20261132"></script>
+  <script src="hidratacion.js?v=20261133"></script>
   <!-- Capa PWA: service worker, instalación y atajos -->
-  <script src="pwa.js?v=20261132"></script>
+  <script src="pwa.js?v=20261133"></script>
 </body>
 </html>

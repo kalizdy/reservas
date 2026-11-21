@@ -28,7 +28,7 @@ WebP y declarar `preload` + `fetchpriority="high"`.
 - Héroe con `width`, `height`, `fetchpriority="high"` y `decoding="async"`.
 - Imágenes de tarjetas con `width`, `height`, `loading="lazy"` y `decoding="async"`.
 - `aspect-ratio` en tarjetas y carrusel.
-- JS/CSS con versión (`?v=20261132`) y Service Worker que evita respuestas viejas.
+- JS/CSS con versión (`?v=20261133`) y Service Worker que evita respuestas viejas.
 
 Los `.jpg` originales se conservan para `manifest.json` (screenshots) y Open Graph,
 pero la app usa `.webp`.
@@ -67,7 +67,7 @@ Cambios principales:
 
 ## Service Worker
 
-- Caché actual: `kalizdy-pwa-v17`.
+- Caché actual: `kalizdy-pwa-v18`.
 - Precarga el shell, catálogo, WebP, DOMPurify, iconos y `offline.html`.
 - Prueba offline real: lobby, 15 juegos, imágenes WebP, hidratación y formulario
   cargan sin servidor; una ruta desconocida muestra `offline.html`.
@@ -77,4 +77,5 @@ Cambios principales:
 - Medición de laboratorio en localhost, no datos de campo.
 - No se emuló 4G/CPU lenta; conviene repetir con Lighthouse móvil o WebPageTest.
 - El LCP puede variar por fuentes de Google y red del hosting.
-- No hay backend ni pagos online: la reserva es una simulación local.
+- No hay pasarela de pago online: el cobro es presencial y las reservas se
+  guardan en Supabase con estado `pendiente`.

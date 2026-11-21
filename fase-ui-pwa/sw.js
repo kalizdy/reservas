@@ -3,10 +3,10 @@
    Shell + catálogo offline, actualizaciones controladas
    ========================================================= */
 
-const CACHE_NAME = 'kalizdy-pwa-v17';
+const CACHE_NAME = 'kalizdy-pwa-v18';
 const CACHE_PREFIX = 'kalizdy-pwa-';
 const OFFLINE_URL = './offline.html';
-const ASSET_VERSION = '20261132';
+const ASSET_VERSION = '20261133';
 
 const APP_SHELL = [
   './',
@@ -17,6 +17,7 @@ const APP_SHELL = [
   `./script.js?v=${ASSET_VERSION}`,
   `./hidratacion.js?v=${ASSET_VERSION}`,
   `./pwa.js?v=${ASSET_VERSION}`,
+  './supabase.js',
   './manifest.json',
   './data/juegos.json',
   './vendor/jquery-3.7.1.min.js',

@@ -440,6 +440,26 @@ $(function () {
     });
   }
 
+  function cargarCatalogoLocal() {
+    return fetch('data/juegos.json').then(function (response) {
+      if (!response.ok) {
+        throw new Error('Error HTTP ' + response.status);
+      }
+      return response.json();
+    });
+  }
+
+  function obtenerCatalogo() {
+    if (window.KalizdyDB && typeof window.KalizdyDB.catalogo === 'function') {
+      return window.KalizdyDB.catalogo().catch(function (error) {
+        console.warn('Supabase no disponible para el catálogo, usando JSON local:', error);
+        return cargarCatalogoLocal();
+      });
+    }
+
+    return cargarCatalogoLocal();
+  }
+
   function cargarJuegos() {
     var $estado = $('#catalogoEstado');
 
@@ -450,13 +470,7 @@ $(function () {
       .show();
     $('#juegosCount').text('Cargando catálogo…');
 
-    fetch('data/juegos.json')
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error('Error HTTP ' + response.status);
-        }
-        return response.json();
-      })
+    obtenerCatalogo()
       .then(function (data) {
         if (!Array.isArray(data)) {
           throw new Error('Formato de catálogo inválido');
@@ -1139,7 +1153,8 @@ $(function () {
      ======================================================= */
   var cuentaTimer = null;
   var segundosRestantes = 30;
-  var envioTimer = null;
+  var envioIdempotencia = null;
+  var envioToken = 0;
 
   function actualizarCuenta() {
     var segundos = Math.max(segundosRestantes, 0);
@@ -1177,21 +1192,22 @@ $(function () {
     }, 1000);
   }
 
-  function generarCodigoReserva() {
-    var ahora = new Date();
-    var base = String(ahora.getFullYear()).slice(-2) +
-      dosDigitos(ahora.getMonth() + 1) +
-      dosDigitos(ahora.getDate());
-    var aleatorio = Math.floor(Math.random() * 900) + 100;
+  function nuevoUuid() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
 
-    return 'KG-' + base + '-' + aleatorio;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      var v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   function resetModalVista() {
-    if (envioTimer) {
-      clearTimeout(envioTimer);
-      envioTimer = null;
-    }
+    envioToken++;
+    envioIdempotencia = null;
+    $('#modalEnvioError').hide().text('');
 
     $('#modalConfirmacion').removeAttr('hidden').show();
     $('#modalEnviado').hide().attr('hidden', 'hidden');
@@ -1203,55 +1219,113 @@ $(function () {
     $('#modalCancelar').prop('disabled', false);
   }
 
-  function enviarReservaSimulada() {
+  function enviarReserva() {
     if ($('#modalConfirmar').prop('disabled')) return;
+
+    if (!window.KalizdyDB || typeof window.KalizdyDB.crearReserva !== 'function') {
+      mostrarToast(
+        '<strong>Sin conexión a Supabase</strong>' +
+        'No se puede enviar la reserva en este momento.',
+        'error'
+      );
+      return;
+    }
 
     detenerCuenta();
 
     var datos = getTotales();
-    var personas = $('#personas').val();
+    var personas = Number($('#personas').val()) || 1;
+    var snacks = [];
     var snacksCount = 0;
 
-    $.each(datos.snacks, function (_, item) {
-      snacksCount += item.qty;
+    $.each(snackState, function (id, qty) {
+      if (qty > 0) {
+        snacks.push({ id: id, cantidad: qty });
+        snacksCount += qty;
+      }
     });
 
+    if (!envioIdempotencia) envioIdempotencia = nuevoUuid();
+
+    var token = ++envioToken;
+    var payload = {
+      p_nombre: $.trim($('#nombre').val()),
+      p_celular: $('#celular').val(),
+      p_estacion: $('#estacion').val(),
+      p_fecha: $('#fecha').val(),
+      p_hora: $('#hora').val(),
+      p_horas: Number($('#horas').val()),
+      p_personas: personas,
+      p_snacks: snacks,
+      p_idempotencia: envioIdempotencia
+    };
+
+    $('#modalEnvioError').hide().text('');
     $('#modalConfirmar')
       .prop('disabled', true)
       .attr('aria-busy', 'true')
       .text('Enviando…');
     $('#modalCancelar').prop('disabled', true);
 
-    // Simula el envío al local sin backend
-    envioTimer = setTimeout(function () {
-      envioTimer = null;
+    window.KalizdyDB.crearReserva(payload)
+      .then(function (reserva) {
+        if (token !== envioToken) return;
 
-      var ahora = new Date();
-      var horaEnvio = dosDigitos(ahora.getHours()) + ':' + dosDigitos(ahora.getMinutes());
+        var ahora = new Date();
+        var horaEnvio = dosDigitos(ahora.getHours()) + ':' + dosDigitos(ahora.getMinutes());
+        var hora = String((reserva && reserva.hora) || $('#hora').val() || '');
+        var personasResp = Number(reserva && reserva.personas) || personas;
+        var horasResp = Number(reserva && reserva.horas) || datos.horas;
+        var totalResp = reserva && reserva.total != null ? reserva.total : datos.total;
 
-      $('#envioNombre').text($('#nombre').val() || 'Gamer');
-      $('#envioEstado').text('Enviado ahora · ' + horaEnvio);
-      $('#envioCodigo').text(generarCodigoReserva());
-      $('#envioEstacion').text(datos.estacion || '—');
-      $('#envioFecha').text(formatFecha($('#fecha').val()));
-      $('#envioHora').text($('#hora').val() || '—');
-      $('#envioPersonas').text(
-        personas ? personas + (personas === '1' ? ' persona' : ' personas') : '—'
-      );
-      $('#envioHoras').text(textoHoras(datos.horas));
-      $('#envioSnacks').text(
-        datos.snacks.length
-          ? snacksCount + (snacksCount === 1 ? ' ítem · ' : ' ítems · ') +
-            'Bs ' + datos.totalSnacks
-          : 'Sin snacks'
-      );
-      $('#envioTotal').text('Bs ' + datos.total);
+        $('#envioNombre').text($('#nombre').val() || 'Gamer');
+        $('#envioEstado').text('Enviado ahora · ' + horaEnvio);
+        $('#envioCodigo').text((reserva && reserva.codigo) || '—');
+        $('#envioEstadoReserva').text(
+          reserva && reserva.estado === 'confirmada'
+            ? 'Confirmada'
+            : 'Pendiente de confirmación'
+        );
+        $('#envioEstacion').text((reserva && reserva.estacion) || datos.estacion || '—');
+        $('#envioFecha').text(formatFecha((reserva && reserva.fecha) || $('#fecha').val()));
+        $('#envioHora').text(hora ? hora.slice(0, 5) : '—');
+        $('#envioPersonas').text(
+          personasResp + (personasResp === 1 ? ' persona' : ' personas')
+        );
+        $('#envioHoras').text(textoHoras(horasResp));
+        $('#envioSnacks').text(
+          datos.snacks.length
+            ? snacksCount + (snacksCount === 1 ? ' ítem · ' : ' ítems · ') +
+              'Bs ' + datos.totalSnacks
+            : 'Sin snacks'
+        );
+        $('#envioTotal').text('Bs ' + totalResp);
 
-      $('#modalConfirmacion').hide().attr('hidden', 'hidden');
-      $('#modalEnviado').removeAttr('hidden').show();
-      $('#modalReserva').attr('aria-labelledby', 'modalEnvioTitulo');
-      $('#modalEnvioTitulo').trigger('focus');
-    }, 850);
+        envioIdempotencia = null;
+
+        $('#modalConfirmacion').hide().attr('hidden', 'hidden');
+        $('#modalEnviado').removeAttr('hidden').show();
+        $('#modalReserva').attr('aria-labelledby', 'modalEnvioTitulo');
+        $('#modalEnvioTitulo').trigger('focus');
+      })
+      .catch(function (error) {
+        if (token !== envioToken) return;
+
+        $('#modalConfirmar')
+          .prop('disabled', false)
+          .removeAttr('aria-busy')
+          .text('Enviar reserva');
+        $('#modalCancelar').prop('disabled', false);
+        $('#modalEnvioError')
+          .text('No se pudo enviar: ' + (error.message || 'error de conexión'))
+          .show();
+
+        mostrarToast(
+          '<strong>No se pudo enviar la reserva</strong>' +
+          (error.message || 'Revisá tu conexión e intentá de nuevo.'),
+          'error'
+        );
+      });
   }
 
   function abrirModal() {
@@ -1297,12 +1371,6 @@ $(function () {
 
   function cerrarModal() {
     detenerCuenta();
-
-    if (envioTimer) {
-      clearTimeout(envioTimer);
-      envioTimer = null;
-    }
-
     $('#modalReserva').fadeOut(200).attr('aria-hidden', 'true');
     $('body').removeClass('modal-open');
     resetModalVista();
@@ -1323,7 +1391,7 @@ $(function () {
     }
   });
 
-  $('#modalConfirmar').on('click', enviarReservaSimulada);
+  $('#modalConfirmar').on('click', enviarReserva);
 
   $('#envioCerrar').on('click', cerrarModal);
 

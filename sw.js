@@ -3,9 +3,9 @@
    PWA offline: shell + catálogo de juegos
    ========================================================= */
 
-const CACHE_NAME = 'kalizdy-game-v9';
+const CACHE_NAME = 'kalizdy-game-v10';
 const CACHE_PREFIX = 'kalizdy-game-';
-const ASSET_VERSION = '20261132';
+const ASSET_VERSION = '20261133';
 
 const APP_SHELL = [
   './',
@@ -13,6 +13,7 @@ const APP_SHELL = [
   `./styles.css?v=${ASSET_VERSION}`,
   `./script.js?v=${ASSET_VERSION}`,
   `./hidratacion.js?v=${ASSET_VERSION}`,
+  './supabase.js',
   './manifest.json',
   './data/juegos.json',
   './vendor/jquery-3.7.1.min.js',

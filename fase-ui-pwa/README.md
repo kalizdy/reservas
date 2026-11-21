@@ -16,6 +16,10 @@ la fase UI terminada, con instalación, actualizaciones, atajos y modo offline r
 | `pwa.css` | Estilos de los controles PWA integrados a la estética HUD |
 | `hidratacion.js` | Hidratación de estado: tema, snacks, cola y borrador de reserva en `localStorage` |
 | `AUDITORIA-CWV.md` | Medición de LCP/CLS antes/después y checklist de la guía C3-A2 |
+| `supabase.js` | Cliente REST/RPC de Supabase con la llave pública |
+| `supabase/setup.sql` | **Script único**: esquema + RLS + RPC + semillas |
+| `supabase/schema.sql` | Tablas, RLS, restricciones y RPC `crear_reserva` |
+| `supabase/seed-juegos.sql` | Carga inicial de los 15 juegos |
 | `styles.css`, `script.js`, `data/`, `icons/`, `vendor/`, `*.webp` | Código y recursos del sitio. DOMPurify local en `vendor/dompurify.min.js` |
 
 ## Funcionalidades PWA
@@ -84,12 +88,51 @@ El estado se guarda **solo en el dispositivo** y no se envía a ningún servidor
 - El modal de confirmación muestra estación, fecha, hora, personas, horas,
   snacks, forma de pago y total antes de enviar.
 - **Pago en el local:** efectivo, tarjeta o QR al llegar. No se cobra online.
-- Al enviar se simula el envío: aparece **“Reserva enviada”** con un código,
-  el resumen completo y la hora de envío. **No hay backend**: es una simulación
-  local, no se envía nada ni se cobra.
+- Al enviar, la reserva se guarda en **Supabase** y aparece **“Reserva enviada”**
+  con el código real, el estado `pendiente`, el resumen y la hora de envío.
 - Desde la confirmación se puede **cerrar** o iniciar **Nueva reserva**.
-- El total es `precio por hora × horas + snacks`.
-- **Limitación:** no hay backend ni control real de disponibilidad/doble reserva.
+- El total es `precio por hora × horas + snacks`, calculado en el servidor.
+- **Limitación:** no hay pasarela de pago online; el cobro es presencial. La
+  disponibilidad y el solapamiento se controlan en Supabase.
+
+## Base de datos Supabase
+
+El proyecto está conectado a Supabase mediante `supabase.js`:
+
+```text
+Project URL: https://depkvzlbomyzaopjiulk.supabase.co
+```
+
+La llave usada es la **publishable/anon pública**. La `service_role` nunca se
+incluye en el frontend.
+
+### Puesta en marcha (una sola vez)
+
+1. Entrá a **Supabase → SQL Editor → New query**.
+2. Pegá y ejecutá **`supabase/setup.sql`** (incluye esquema, RLS, RPC y semillas).
+3. Verificá que `estaciones`, `juegos`, `snacks` y `reservas` tengan datos.
+4. Para el panel admin, creá el usuario en **Authentication** y ejecutá:
+
+```sql
+insert into public.perfiles (user_id, rol)
+select id, 'admin' from auth.users where email = 'TU_CORREO_ADMIN';
+```
+
+### Cómo funciona
+
+- El catálogo de juegos se lee desde Supabase.
+- Si Supabase no responde o no hay red, el catálogo usa `data/juegos.json`
+  como respaldo offline.
+- La reserva se envía a la RPC `crear_reserva`:
+  - valida fecha, hora, horas, personas y snacks,
+  - calcula precios en el servidor,
+  - evita doble reserva,
+  - genera el código real `KG-...`,
+  - guarda el estado `pendiente`.
+- Si no hay internet, la reserva **no se inventa**: se muestra un error y se
+  puede reintentar. El pago sigue siendo en el local.
+- Las tablas tienen RLS: catálogo público de lectura, reservas solo por RPC y
+  lectura/gestión para administradores autenticados.
 
 ## Cómo probarlo
 
@@ -121,9 +164,9 @@ Luego abrí `http://localhost:8080`.
 ### Probar una actualización
 
 1. Cambiá la versión en dos lugares:
-   - `ASSET_VERSION` en `sw.js` (por ejemplo `20261132` → `20261133`).
-   - Los `?v=20261132` de `index.html` (styles, pwa.css, script, hidratacion y pwa.js).
-2. Cambiá también `CACHE_NAME` (por ejemplo `kalizdy-pwa-v17` → `kalizdy-pwa-v18`).
+   - `ASSET_VERSION` en `sw.js` (por ejemplo `20261133` → `20261134`).
+   - Los `?v=20261133` de `index.html` (styles, pwa.css, script, hidratacion y pwa.js).
+2. Cambiá también `CACHE_NAME` (por ejemplo `kalizdy-pwa-v18` → `kalizdy-pwa-v19`).
 3. Recargá dos veces: aparece el banner **Nueva versión disponible**.
 4. Presioná **Actualizar**: el SW toma el control y la página se recarga una vez.
 
